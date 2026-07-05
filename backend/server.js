@@ -38,7 +38,7 @@ const SUPERMARKET_PROFILES = {
 function buildPrompt({ budget, persone, pasto, preferenze, intolleranze, vegano, supermercato }) {
   const profilo = SUPERMARKET_PROFILES[supermercato?.toLowerCase()] || 'supermercato generico italiano';
 
-  return `Sei un assistente esperto di spesa e cucina italiana. Devi proporre esattamente 10 ricette diverse, sintetiche e realistiche, rispettando rigorosamente questi vincoli.
+  return `Sei un assistente esperto di spesa e cucina italiana. Devi proporre esattamente 4 ricette diverse, sintetiche e realistiche, rispettando rigorosamente questi vincoli.
 
 DATI:
 - Numero di persone: ${persone}
@@ -59,11 +59,12 @@ ISTRUZIONI:
 7. Ogni ricetta deve avere la sua lista_spesa specifica.
 8. Non mischiare gli ingredienti di ricette diverse.
 9. Ogni ricetta deve avere il suo totale_stimato_euro.
-10. Ogni ricetta deve avere una preparazione_step_by_step con 4-6 passaggi chiari, pratici e specifici per quella ricetta, non generici e non copiati dall'esempio.
-11. Rispondi SOLO in JSON valido, senza testo fuori dal JSON. Non inserire virgole finali dopo l'ultimo elemento di array o oggetti.
-Formato richiesto:
+10. Ogni ricetta deve avere una difficolta: "Facile", "Media" oppure "Difficile".
+11. Ogni ricetta deve avere una preparazione_step_by_step con 4-6 passaggi chiari, pratici e specifici per quella ricetta, non generici e non copiati dall'esempio.
 12. Mantieni ogni descrizione breve e ogni lista_spesa essenziale, massimo 6 prodotti per ricetta.
+13. Rispondi SOLO in JSON valido, senza testo fuori dal JSON. Non inserire virgole finali dopo l'ultimo elemento di array o oggetti.
 
+Formato richiesto:
 {
   "ricette": [
     {
@@ -71,7 +72,8 @@ Formato richiesto:
       "nome_ricerca": "Gnocchi alla sorrentina",
       "descrizione_breve": "Gnocchi con sugo di pomodoro, mozzarella e basilico.",
       "tempo_preparazione_minuti": 25,
-      "emoji": "🍝",
+"difficolta": "Facile",
+"emoji": "🍝",
 "preparazione_step_by_step": [
   "Passaggio pratico 1 specifico per questa ricetta.",
   "Passaggio pratico 2 specifico per questa ricetta.",
@@ -216,7 +218,11 @@ const geminiResponse = await fetch(GEMINI_URL, {
                 nome_ricerca: { type: 'STRING' },
                 descrizione_breve: { type: 'STRING' },
                 tempo_preparazione_minuti: { type: 'NUMBER' },
-                emoji: { type: 'STRING' },
+difficolta: {
+  type: 'STRING',
+  enum: ['Facile', 'Media', 'Difficile']
+},
+emoji: { type: 'STRING' },
 preparazione_step_by_step: {
   type: 'ARRAY',
   items: {
@@ -246,7 +252,8 @@ lista_spesa: {
   'nome_ricerca',
   'descrizione_breve',
   'tempo_preparazione_minuti',
-  'emoji',
+'difficolta',
+'emoji',
   'preparazione_step_by_step',
   'lista_spesa',
   'totale_stimato_euro'
