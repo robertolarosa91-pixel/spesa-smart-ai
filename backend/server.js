@@ -43,7 +43,7 @@ function buildPrompt({ budget, persone, pasto, preferenze, intolleranze, vegano,
 DATI:
 - Numero di persone: ${persone}
 - Pasto: ${pasto}
-- Budget massimo per singola ricetta: €${budget}
+- Budget massimo PER SINGOLA RICETTA / SINGOLO PIATTO: €${budget}
 - Supermercato: ${supermercato} (${profilo})
 - Preferenze alimentari: ${preferenze || 'nessuna preferenza particolare'}
 - Vegano: ${vegano ? 'si' : 'no'}
@@ -51,14 +51,16 @@ DATI:
 
 ISTRUZIONI:
 1. Proponi prodotti realistici per il tipo di supermercato indicato.
-2. Ogni singola ricetta deve rispettare il budget massimo indicato.
-3. Se ci sono intolleranze o vegano, escludi ogni ingrediente incompatibile.
-4. Ogni ricetta deve avere la sua lista_spesa specifica.
-5. Non mischiare gli ingredienti di ricette diverse.
-6. Ogni ricetta deve avere il suo totale_stimato_euro.
-7. Ogni ricetta deve avere una preparazione_step_by_step con 5-8 passaggi chiari e pratici.
-8. Rispondi SOLO in JSON valido, senza testo fuori dal JSON.
-
+2. Il budget indicato è un TETTO MASSIMO per ogni singola ricetta/piatto, non un budget totale e non un obiettivo da raggiungere.
+3. Non devi per forza usare tutto il budget: una ricetta da €11 è valida sia con budget €15, sia con budget €30, sia con budget €75.
+4. Se il budget è basso, proponi comunque piatti realistici sotto quel limite.
+5. Scarta solo le ricette che superano il budget massimo per singolo piatto.
+6. Se ci sono intolleranze o vegano, escludi ogni ingrediente incompatibile.
+7. Ogni ricetta deve avere la sua lista_spesa specifica.
+8. Non mischiare gli ingredienti di ricette diverse.
+9. Ogni ricetta deve avere il suo totale_stimato_euro.
+10. Ogni ricetta deve avere una preparazione_step_by_step con 5-8 passaggi chiari e pratici.
+11. Rispondi SOLO in JSON valido, senza testo fuori dal JSON.
 Formato richiesto:
 
 {
