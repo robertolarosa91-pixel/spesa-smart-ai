@@ -78,6 +78,40 @@ setProdottiAcquistati({});
     }
   }
 
+async function generaAltreRicette() {
+  setLoading(true);
+  setErrore(null);
+  setRicettaSelezionata(0);
+  setPaginaRicette(0);
+  setProdottiAcquistati({});
+
+  const ricetteDaEvitare = (risultato?.ricette || [])
+    .map(r => r.nome)
+    .filter(Boolean);
+
+  try {
+    const res = await fetch(`${API_URL}/api/suggest`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...form,
+        intolleranze: form.intolleranze.join(', '),
+        ricette_da_evitare: ricetteDaEvitare,
+        variante: Date.now()
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Errore sconosciuto');
+
+    setRisultato(data);
+  } catch (err) {
+    setErrore(err.message);
+  } finally {
+    setLoading(false);
+  }
+}
+
   function resetTutto() {
   setRisultato(null);
 setProdottiAcquistati({});
@@ -267,7 +301,15 @@ const preparazioneAttiva =
           </section>
         </div>
 
-        <button className="submit-btn" onClick={resetTutto}>Ricomincia</button>
+        <button className="submit-btn" onClick={generaAltreRicette} disabled={loading}>
+  {loading ? 'Genero nuove ricette...' : 'Genera altre ricette'}
+</button>
+
+<button className="submit-btn secondary-btn" onClick={resetTutto}>
+  Ricomincia
+</button>
+
+{errore && <div className="error-box">Errore: {errore}</div>}
       </div>
     );
   }
