@@ -14,7 +14,7 @@ const SUPERMERCATI = [
 
 const INTOLLERANZE_COMUNI = ['Glutine', 'Lattosio', 'Frutta a guscio', 'Uova', 'Pesce/crostacei', 'Soia'];
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_URL = import.meta.env.VITE_API_URL || 'https://spesa-smart-ai-backend.onrender.com';
 
 const STEPS = ['Budget', 'Chi mangia', 'Negozio', 'Gusti', 'Riepilogo'];
 
