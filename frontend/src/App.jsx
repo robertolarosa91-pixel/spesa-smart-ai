@@ -104,7 +104,8 @@ const preparazioneAttiva =
   [];
 
   return (
-      <div className="result-hero">
+  <div className="page">
+    <div className="result-hero">
   <span className="eyebrow">Ecco cosa ti serve</span>
   <h1>La tua spesa è pronta</h1>
 
