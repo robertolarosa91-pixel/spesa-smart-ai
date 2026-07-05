@@ -384,3 +384,42 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Int
   width: 150px;
   height: 150px;
 }
+
+.preparazione-box {
+  margin-top: 28px;
+}
+
+.preparazione-lista {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: grid;
+  gap: 12px;
+}
+
+.preparazione-lista li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(36, 124, 105, 0.08);
+}
+
+.step-number {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #247c69;
+  color: white;
+  font-weight: 700;
+  flex: 0 0 30px;
+}
+
+.preparazione-lista p {
+  margin: 0;
+  line-height: 1.45;
+}
