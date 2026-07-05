@@ -272,11 +272,12 @@ try {
   const msg = String(e.message || '');
 
   if (msg.toLowerCase().includes('quota exceeded')) {
-    return res.status(429).json({
-      error: 'Limite temporaneo raggiunto',
-      details: 'Hai raggiunto il limite gratuito di richieste Gemini. Riprova tra circa 1 minuto.'
-    });
-  }
+  return res.status(429).json({
+    error: 'Troppe richieste al momento',
+    details: 'Troppe richieste al momento. Riprova tra 1 minuto.',
+    retryAfterSeconds: 60
+  });
+}
 
   if (msg.toLowerCase().includes('high demand')) {
     return res.status(503).json({
