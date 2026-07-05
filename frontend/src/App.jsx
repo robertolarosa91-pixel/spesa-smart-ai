@@ -33,6 +33,7 @@ export default function App() {
 const [loading, setLoading] = useState(false);
 const [errore, setErrore] = useState(null);
 const [ricettaSelezionata, setRicettaSelezionata] = useState(0);
+const [paginaRicette, setPaginaRicette] = useState(0);
 const [prodottiAcquistati, setProdottiAcquistati] = useState({});
 
   function toggleIntolleranza(item) {
@@ -57,6 +58,7 @@ const [prodottiAcquistati, setProdottiAcquistati] = useState({});
     setErrore(null);
     setRisultato(null);
 setRicettaSelezionata(0);
+setPaginaRicette(0);
 setProdottiAcquistati({});
 
     try {
@@ -78,15 +80,23 @@ setProdottiAcquistati({});
 
   function resetTutto() {
   setRisultato(null);
-  setProdottiAcquistati({});
-  setRicettaSelezionata(0);
-  setStep(0);
+setProdottiAcquistati({});
+setRicettaSelezionata(0);
+setPaginaRicette(0);
+setStep(0);
 }
 
   if (risultato) {
-  const ricettaAttiva = risultato.ricette?.[ricettaSelezionata];
-const listaSpesaAttiva = ricettaAttiva?.lista_spesa || risultato.lista_spesa || [];
-const totaleAttivo = ricettaAttiva?.totale_stimato_euro ?? risultato.totale_stimato_euro;
+  const RICETTE_PER_PAGINA = 2;
+  const ricette = risultato.ricette || [];
+  const totalePagineRicette = Math.ceil(ricette.length / RICETTE_PER_PAGINA);
+  const inizioRicette = paginaRicette * RICETTE_PER_PAGINA;
+  const ricetteVisibili = ricette.slice(inizioRicette, inizioRicette + RICETTE_PER_PAGINA);
+
+  const ricettaAttiva = ricette[ricettaSelezionata];
+  const listaSpesaAttiva = ricettaAttiva?.lista_spesa || risultato.lista_spesa || [];
+  const totaleAttivo = ricettaAttiva?.totale_stimato_euro ?? risultato.totale_stimato_euro;
+
 const preparazioneAttiva =
   ricettaAttiva?.preparazione_step_by_step ||
   ricettaAttiva?.preparazione ||
@@ -103,7 +113,10 @@ const preparazioneAttiva =
         <div className="risultato">
           <section>
             <h2>Ricette</h2>
-            {risultato.ricette?.map((r, i) => (
+            {ricetteVisibili.map((r, indexLocale) => {
+  const i = inizioRicette + indexLocale;
+
+  return (
               <div
   key={i}
   className="card recipe-card fade-in"
@@ -112,7 +125,7 @@ const preparazioneAttiva =
     setProdottiAcquistati({});
   }}
   style={{
-    animationDelay: `${i * 0.08}s`,
+    animationDelay: `${indexLocale * 0.08}s`,
     cursor: 'pointer',
     border: ricettaSelezionata === i ? '2px solid #247c69' : undefined
   }}
@@ -131,7 +144,43 @@ const preparazioneAttiva =
                   <span className="tempo">⏱ {r.tempo_preparazione_minuti} min</span>
                 </div>
               </div>
-            ))}
+             );
+            })}
+
+
+{totalePagineRicette > 1 && (
+  <div className="recipe-pagination">
+    <button
+      type="button"
+      disabled={paginaRicette === 0}
+      onClick={() => {
+        const nuovaPagina = Math.max(0, paginaRicette - 1);
+        setPaginaRicette(nuovaPagina);
+        setRicettaSelezionata(nuovaPagina * RICETTE_PER_PAGINA);
+        setProdottiAcquistati({});
+      }}
+    >
+      ←
+    </button>
+
+    <span>
+      {paginaRicette + 1} / {totalePagineRicette}
+    </span>
+
+    <button
+      type="button"
+      disabled={paginaRicette >= totalePagineRicette - 1}
+      onClick={() => {
+        const nuovaPagina = Math.min(totalePagineRicette - 1, paginaRicette + 1);
+        setPaginaRicette(nuovaPagina);
+        setRicettaSelezionata(nuovaPagina * RICETTE_PER_PAGINA);
+        setProdottiAcquistati({});
+      }}
+    >
+      →
+    </button>
+  </div>
+)}
           </section>
 
           <section>
@@ -312,7 +361,10 @@ const preparazioneAttiva =
             <div className="summary-card">
               <div className="summary-row"><span>Budget</span><strong>€{form.budget}</strong></div>
               <div className="summary-row"><span>Persone</span><strong>{form.persone}</strong></div>
-              <div className="summary-row"><span>Pasto</span><strong>{form.pasto}</strong></div>
+              <div className="summary-row">
+  <span>Pasto</span>
+  <strong>{form.pasto === 'cena' ? 'Cena' : 'Pranzo'}</strong>
+</div>
               <div className="summary-row"><span>Supermercato</span><strong>{SUPERMERCATI.find(s => s.id === form.supermercato)?.label}</strong></div>
               {form.vegano && <div className="summary-row"><span>Dieta</span><strong>Vegano</strong></div>}
               {form.intolleranze.length > 0 && <div className="summary-row"><span>Da evitare</span><strong>{form.intolleranze.join(', ')}</strong></div>}
