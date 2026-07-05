@@ -9,7 +9,9 @@ app.use(express.json());
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL = 'gemini-flash-latest';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
-const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
+const SERPAPI_KEY = process.env.SERPAPI_KEY;
+
+
 
 const SUPERMARKET_PROFILES = {
   lidl: 'discount tedesco, marche proprie (Milbona, Vitasia, Alesto), buon rapporto qualita prezzo, prodotti freschi a rotazione settimanale',
@@ -66,20 +68,23 @@ ISTRUZIONI:
 
 async function cercaImmagineRicetta(nome) {
   try {
-    if (!SPOONACULAR_API_KEY) return null;
+    if (!SERPAPI_KEY) return null;
 
-    const url = `https://api.spoonacular.com/recipes/complexSearch?query=${encodeURIComponent(nome)}&cuisine=Italian&number=1&apiKey=${SPOONACULAR_API_KEY}`;
+    const query = `${nome} piatto cucina italiana food photography`;
+    const url = `https://serpapi.com/search.json?engine=google_images&q=${encodeURIComponent(query)}&api_key=${SERPAPI_KEY}`;
 
     const response = await fetch(url);
     const data = await response.json();
 
-    if (data.results && data.results.length > 0) {
-      return data.results[0].image;
+    const immagini = data.images_results || [];
+
+    if (immagini.length > 0) {
+      return immagini[0].original || immagini[0].thumbnail || null;
     }
 
     return null;
   } catch (err) {
-    console.error('Errore Spoonacular:', err.message);
+    console.error('Errore SerpAPI:', err.message);
     return null;
   }
 }
