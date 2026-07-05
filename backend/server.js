@@ -56,7 +56,8 @@ ISTRUZIONI:
 4. Ogni ricetta deve avere la sua lista_spesa specifica.
 5. Non mischiare gli ingredienti di ricette diverse.
 6. Ogni ricetta deve avere il suo totale_stimato_euro.
-7. Rispondi SOLO in JSON valido, senza testo fuori dal JSON.
+7. Ogni ricetta deve avere una preparazione_step_by_step con 5-8 passaggi chiari e pratici.
+8. Rispondi SOLO in JSON valido, senza testo fuori dal JSON.
 
 Formato richiesto:
 
@@ -68,7 +69,15 @@ Formato richiesto:
       "descrizione_breve": "Gnocchi con sugo di pomodoro, mozzarella e basilico.",
       "tempo_preparazione_minuti": 25,
       "emoji": "🍝",
-      "lista_spesa": [
+"preparazione_step_by_step": [
+  "Porta a ebollizione una pentola d'acqua salata.",
+  "Cuoci gli gnocchi seguendo i tempi indicati sulla confezione.",
+  "Scalda il sugo di pomodoro in una padella.",
+  "Scola gli gnocchi appena salgono a galla.",
+  "Unisci gnocchi, sugo e mozzarella.",
+  "Lascia sciogliere la mozzarella e servi caldo."
+],
+"lista_spesa": [
         {
           "prodotto": "Gnocchi di patate",
           "quantita": "1 confezione",
@@ -186,7 +195,13 @@ const geminiResponse = await fetch(GEMINI_URL, {
                 descrizione_breve: { type: 'STRING' },
                 tempo_preparazione_minuti: { type: 'NUMBER' },
                 emoji: { type: 'STRING' },
-                lista_spesa: {
+preparazione_step_by_step: {
+  type: 'ARRAY',
+  items: {
+    type: 'STRING'
+  }
+},
+lista_spesa: {
                   type: 'ARRAY',
                   items: {
                     type: 'OBJECT',
@@ -205,14 +220,15 @@ const geminiResponse = await fetch(GEMINI_URL, {
                 totale_stimato_euro: { type: 'NUMBER' }
               },
               required: [
-                'nome',
-                'nome_ricerca',
-                'descrizione_breve',
-                'tempo_preparazione_minuti',
-                'emoji',
-                'lista_spesa',
-                'totale_stimato_euro'
-              ]
+  'nome',
+  'nome_ricerca',
+  'descrizione_breve',
+  'tempo_preparazione_minuti',
+  'emoji',
+  'preparazione_step_by_step',
+  'lista_spesa',
+  'totale_stimato_euro'
+]
             }
           },
           note: { type: 'STRING' }
