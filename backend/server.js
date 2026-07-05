@@ -43,7 +43,7 @@ function buildPrompt({ budget, persone, pasto, preferenze, intolleranze, vegano,
 DATI:
 - Numero di persone: ${persone}
 - Pasto: ${pasto}
-- Budget massimo PER SINGOLA RICETTA / SINGOLO PIATTO: €${budget}
+- Budget massimo PER SINGOLA RICETTA: €${budget}
 - Supermercato: ${supermercato} (${profilo})
 - Preferenze alimentari: ${preferenze || 'nessuna preferenza particolare'}
 - Vegano: ${vegano ? 'si' : 'no'}
@@ -51,10 +51,10 @@ DATI:
 
 ISTRUZIONI:
 1. Proponi prodotti realistici per il tipo di supermercato indicato.
-2. Il budget indicato è un TETTO MASSIMO per ogni singola ricetta/piatto, non un budget totale e non un obiettivo da raggiungere.
+2. Il budget indicato è un TETTO MASSIMO per ogni singola ricetta, non un budget totale e non un obiettivo da raggiungere.
 3. Non devi per forza usare tutto il budget: una ricetta da €11 è valida sia con budget €15, sia con budget €30, sia con budget €75.
 4. Se il budget è basso, proponi comunque piatti realistici sotto quel limite.
-5. Scarta solo le ricette che superano il budget massimo per singolo piatto.
+5. Scarta solo le ricette che superano il budget massimo per singola ricetta.
 6. Se ci sono intolleranze o vegano, escludi ogni ingrediente incompatibile.
 7. Ogni ricetta deve avere la sua lista_spesa specifica.
 8. Non mischiare gli ingredienti di ricette diverse.
