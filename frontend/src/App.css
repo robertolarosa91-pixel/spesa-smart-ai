@@ -454,3 +454,33 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Int
   font-weight: 700;
   color: #247c69;
 }
+
+.recipe-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.difficulty {
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.difficulty-facile {
+  background: rgba(36, 124, 105, 0.12);
+  color: #247c69;
+}
+
+.difficulty-media {
+  background: rgba(230, 150, 40, 0.16);
+  color: #a85f00;
+}
+
+.difficulty-difficile {
+  background: rgba(220, 70, 55, 0.14);
+  color: #b43626;
+}
