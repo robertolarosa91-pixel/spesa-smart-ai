@@ -174,7 +174,7 @@ const preparazioneAttiva =
             </ul>
             <div className="totale">
   Totale stimato <strong>€{totaleAttivo?.toFixed(2)}</strong>
-  <span className="totale-budget"> / budget €{form.budget}</span>
+  <span className="totale-budget"> / max €{form.budget} per piatto</span>
 </div>
 
 {preparazioneAttiva?.length > 0 && (
@@ -215,8 +215,8 @@ const preparazioneAttiva =
       <div className="step-content fade-in" key={step}>
         {step === 0 && (
           <div className="step-body">
-            <h1 className="step-title">Quanto vuoi spendere?</h1>
-            <div className="budget-display">€{form.budget}</div>
+            <h1 className="step-title">Budget massimo per piatto?</h1>
+            <div className="budget-display">Fino a €{form.budget}</div>
             <input
               type="range" min="5" max="150" step="5"
               value={form.budget}
