@@ -60,7 +60,7 @@ ISTRUZIONI:
 8. Non mischiare gli ingredienti di ricette diverse.
 9. Ogni ricetta deve avere il suo totale_stimato_euro.
 10. Ogni ricetta deve avere una preparazione_step_by_step con 5-8 passaggi chiari, pratici e specifici per quella ricetta, non generici e non copiati dall'esempio.
-11. Rispondi SOLO in JSON valido, senza testo fuori dal JSON.
+11. Rispondi SOLO in JSON valido, senza testo fuori dal JSON. Non inserire virgole finali dopo l'ultimo elemento di array o oggetti.
 Formato richiesto:
 
 {
@@ -114,13 +114,33 @@ function extractJsonObject(text) {
 
   try {
     return JSON.parse(cleaned);
-  } catch {
+  } catch (firstError) {
     cleaned = cleaned
+      // Toglie virgole finali non valide
       .replace(/,\s*}/g, '}')
       .replace(/,\s*]/g, ']')
-      .replace(/:\s*(\d+),(\d+)/g, ': $1.$2');
 
-    return JSON.parse(cleaned);
+      // Corregge prezzi scritti tipo 8,50 invece di 8.50
+      .replace(/:\s*(\d+),(\d+)/g, ': $1.$2')
+
+      // Corregge il caso:
+      // ]
+      // "lista_spesa":
+      .replace(/]\s*\n\s*"/g, '],\n"')
+
+      // Corregge il caso:
+      // }
+      // "campo":
+      .replace(/}\s*\n\s*"/g, '},\n"');
+
+    try {
+      return JSON.parse(cleaned);
+    } catch (secondError) {
+      console.error('JSON originale non valido:', firstError.message);
+      console.error('JSON corretto ancora non valido:', secondError.message);
+      console.error('JSON dopo correzione:', cleaned);
+      throw secondError;
+    }
   }
 }
 
