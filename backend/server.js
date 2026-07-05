@@ -19,8 +19,14 @@ app.options('*', cors());
 app.use(express.json());
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = 'gemini-2.5-flash';
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+const GEMINI_MODELS = [
+  'gemini-2.5-flash',
+  'gemini-2.0-flash'
+];
+
+function getGeminiUrl(model) {
+  return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+}
 const SERPAPI_KEY = process.env.SERPAPI_KEY;
 
 
@@ -181,6 +187,117 @@ return null;
     return null;
   }
 }
+
+
+async function callGemini(prompt) {
+  let lastError = null;
+
+  for (const model of GEMINI_MODELS) {
+    const response = await fetch(getGeminiUrl(model), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [{ text: prompt }]
+          }
+        ],
+        generationConfig: {
+          temperature: 0.4,
+          maxOutputTokens: 12000,
+          responseMimeType: 'application/json',
+          responseSchema: {
+            type: 'OBJECT',
+            properties: {
+              ricette: {
+                type: 'ARRAY',
+                minItems: 4,
+                maxItems: 4,
+                items: {
+                  type: 'OBJECT',
+                  properties: {
+                    nome: { type: 'STRING' },
+                    nome_ricerca: { type: 'STRING' },
+                    descrizione_breve: { type: 'STRING' },
+                    tempo_preparazione_minuti: { type: 'NUMBER' },
+                    difficolta: {
+                      type: 'STRING',
+                      enum: ['Facile', 'Media', 'Difficile']
+                    },
+                    emoji: { type: 'STRING' },
+                    preparazione_step_by_step: {
+                      type: 'ARRAY',
+                      minItems: 4,
+                      maxItems: 6,
+                      items: {
+                        type: 'STRING'
+                      }
+                    },
+                    lista_spesa: {
+                      type: 'ARRAY',
+                      maxItems: 6,
+                      items: {
+                        type: 'OBJECT',
+                        properties: {
+                          prodotto: { type: 'STRING' },
+                          quantita: { type: 'STRING' },
+                          prezzo_stimato_euro: { type: 'NUMBER' }
+                        },
+                        required: [
+                          'prodotto',
+                          'quantita',
+                          'prezzo_stimato_euro'
+                        ]
+                      }
+                    },
+                    totale_stimato_euro: { type: 'NUMBER' }
+                  },
+                  required: [
+                    'nome',
+                    'nome_ricerca',
+                    'descrizione_breve',
+                    'tempo_preparazione_minuti',
+                    'difficolta',
+                    'emoji',
+                    'preparazione_step_by_step',
+                    'lista_spesa',
+                    'totale_stimato_euro'
+                  ]
+                }
+              },
+              note: { type: 'STRING' }
+            },
+            required: [
+              'ricette',
+              'note'
+            ]
+          }
+        }
+      })
+    });
+
+    let data;
+
+    try {
+      data = await response.json();
+    } catch (err) {
+      lastError = `Risposta non JSON da ${model}: ${err.message}`;
+      console.error(lastError);
+      continue;
+    }
+
+    if (response.ok) {
+      return data;
+    }
+
+    lastError = data?.error?.message || `Errore Gemini HTTP ${response.status}`;
+    console.error(`Gemini API error con ${model}:`, lastError);
+  }
+
+  throw new Error(lastError || 'Errore Gemini');
+}
 app.post('/api/suggest', async (req, res) => {
   try {
     const { budget, persone, pasto, supermercato } = req.body;
@@ -191,96 +308,17 @@ app.post('/api/suggest', async (req, res) => {
 
     const prompt = buildPrompt(req.body);
 
-const geminiResponse = await fetch(GEMINI_URL, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    contents: [
-      {
-        parts: [{ text: prompt }]
-      }
-    ],
-    generationConfig: {
-      temperature: 0.4,
-      maxOutputTokens: 12000,
-      responseMimeType: 'application/json',
-      responseSchema: {
-        type: 'OBJECT',
-        properties: {
-          ricette: {
-  type: 'ARRAY',
-  minItems: 4,
-  maxItems: 4,
-  items: {
-              type: 'OBJECT',
-              properties: {
-                nome: { type: 'STRING' },
-                nome_ricerca: { type: 'STRING' },
-                descrizione_breve: { type: 'STRING' },
-                tempo_preparazione_minuti: { type: 'NUMBER' },
-difficolta: {
-  type: 'STRING',
-  enum: ['Facile', 'Media', 'Difficile']
-},
-emoji: { type: 'STRING' },
-preparazione_step_by_step: {
-  type: 'ARRAY',
-  minItems: 4,
-  maxItems: 6,
-  items: {
-    type: 'STRING'
-  }
-},
-lista_spesa: {
-                  type: 'ARRAY',
-                  maxItems: 6,
-                  items: {
-                    type: 'OBJECT',
-                    properties: {
-                      prodotto: { type: 'STRING' },
-                      quantita: { type: 'STRING' },
-                      prezzo_stimato_euro: { type: 'NUMBER' }
-                    },
-                    required: [
-                      'prodotto',
-                      'quantita',
-                      'prezzo_stimato_euro'
-                    ]
-                  }
-                },
-                totale_stimato_euro: { type: 'NUMBER' }
-              },
-              required: [
-  'nome',
-  'nome_ricerca',
-  'descrizione_breve',
-  'tempo_preparazione_minuti',
-'difficolta',
-'emoji',
-  'preparazione_step_by_step',
-  'lista_spesa',
-  'totale_stimato_euro'
-]
-            }
-          },
-          note: { type: 'STRING' }
-        },
-        required: [
-          'ricette',
-          'note'
-        ]
-      }
-    }
-  })
-});
-const data = await geminiResponse.json();
 
-if (!geminiResponse.ok) {
-  const msg = data?.error?.message || `Errore Gemini HTTP ${geminiResponse.status}`;
-  console.error('Gemini API error:', msg);
-  return res.status(502).json({ error: 'Errore nella chiamata AI', details: msg });
+
+let data;
+
+try {
+  data = await callGemini(prompt);
+} catch (e) {
+  return res.status(502).json({
+    error: 'Errore nella chiamata AI',
+    details: e.message
+  });
 }
 
 const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
