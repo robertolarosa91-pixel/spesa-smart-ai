@@ -41,10 +41,13 @@ const SUPERMARKET_PROFILES = {
   carrefour: 'ipermercato generalista, marchio Carrefour, ampia scelta internazionale'
 };
 
-function buildPrompt({ persone, pasto, preferenze, intolleranze, vegano, supermercato }) {
+function buildPrompt({ persone, pasto, preferenze, intolleranze, vegano, supermercato, ricette_da_evitare }) {
+ 
   const profilo = SUPERMARKET_PROFILES[supermercato?.toLowerCase()] || 'supermercato generico italiano';
-
-  return `Sei un assistente esperto di spesa e cucina italiana. Devi proporre esattamente 4 ricette diverse, sintetiche e realistiche, rispettando rigorosamente questi vincoli.
+  const ricetteDaEvitare = Array.isArray(ricette_da_evitare)
+  ? ricette_da_evitare.filter(Boolean).join(', ')
+  : '';
+  return `Sei un assistente esperto di spesa e cucina italiana. Devi proporre esattamente 6 ricette diverse, sintetiche e realistiche, rispettando rigorosamente questi vincoli.
 
 DATI:
 - Numero di persone: ${persone}
@@ -54,6 +57,7 @@ DATI:
 - Preferenze alimentari: ${preferenze || 'nessuna preferenza particolare'}
 - Vegano: ${vegano ? 'si' : 'no'}
 - Intolleranze/allergie da evitare assolutamente: ${intolleranze || 'nessuna'}
+- Ricette già proposte da evitare: ${ricetteDaEvitare || 'nessuna'}
 
 ISTRUZIONI:
 1. Proponi prodotti realistici per il tipo di supermercato indicato.
@@ -67,9 +71,10 @@ ISTRUZIONI:
 9. Ogni ricetta deve avere una difficolta: "Facile", "Media" oppure "Difficile".
 10. Ogni ricetta deve avere una preparazione_step_by_step con 4-6 passaggi chiari, pratici e specifici per quella ricetta.
 11. Mantieni ogni descrizione breve e ogni lista_spesa essenziale, massimo 6 prodotti per ricetta.
-12. Rispondi SOLO in JSON valido, senza testo fuori dal JSON. Non inserire virgole finali dopo l'ultimo elemento di array o oggetti.
+12. Se sono indicate ricette già proposte da evitare, non riproporle.
+13. Rispondi SOLO in JSON valido, senza testo fuori dal JSON. Non inserire virgole finali dopo l'ultimo elemento di array o oggetti.
 
-Formato richiesto. Dentro "ricette" devi generare esattamente 4 oggetti come questo esempio:
+Formato richiesto. Dentro "ricette" devi generare esattamente 6 oggetti come questo esempio:
 {
   "ricette": [
     {
@@ -212,8 +217,8 @@ async function callGemini(prompt) {
             properties: {
               ricette: {
                 type: 'ARRAY',
-                minItems: 4,
-                maxItems: 4,
+                minItems: 6,
+maxItems: 6,
                 items: {
                   type: 'OBJECT',
                   properties: {
@@ -227,9 +232,9 @@ async function callGemini(prompt) {
                     },
                     emoji: { type: 'STRING' },
                     preparazione_step_by_step: {
-                      type: 'ARRAY',
-                      minItems: 4,
-                      maxItems: 6,
+  type: 'ARRAY',
+  minItems: 4,
+  maxItems: 6,
                       items: {
                         type: 'STRING'
                       }
