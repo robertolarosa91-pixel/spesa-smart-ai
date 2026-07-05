@@ -16,12 +16,12 @@ const INTOLLERANZE_COMUNI = ['Glutine', 'Lattosio', 'Frutta a guscio', 'Uova', '
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://spesa-smart-ai-backend.onrender.com';
 
-const STEPS = ['Budget', 'Chi mangia', 'Negozio', 'Gusti', 'Riepilogo'];
+const STEPS = ['Chi mangia', 'Negozio', 'Gusti', 'Riepilogo'];
 
 export default function App() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
-    budget: 20,
+    
     persone: 2,
     pasto: 'cena',
     supermercato: 'lidl',
@@ -113,7 +113,7 @@ const preparazioneAttiva =
     <span>{form.pasto === 'cena' ? 'Cena' : 'Pranzo'}</span>
     <span>{form.persone} {form.persone === 1 ? 'persona' : 'persone'}</span>
     <span>{SUPERMERCATI.find(s => s.id === form.supermercato)?.label}</span>
-    <span>Max €{form.budget} per ricetta</span>
+    
 
     {form.vegano && <span>Vegano</span>}
 
@@ -245,7 +245,7 @@ const preparazioneAttiva =
             </ul>
             <div className="totale">
   Totale stimato <strong>€{totaleAttivo?.toFixed(2)}</strong>
-  <span className="totale-budget"> / max €{form.budget} per ricetta</span>
+  <span className="totale-budget"> stimati</span>
 </div>
 
 {preparazioneAttiva?.length > 0 && (
@@ -284,21 +284,9 @@ const preparazioneAttiva =
       <p className="step-label">Passo {step + 1} di {STEPS.length} — {STEPS[step]}</p>
 
       <div className="step-content fade-in" key={step}>
-        {step === 0 && (
-          <div className="step-body">
-            <h1 className="step-title">Budget massimo per ricetta?</h1>
-            <div className="budget-display">Fino a €{form.budget}</div>
-            <input
-              type="range" min="5" max="150" step="5"
-              value={form.budget}
-              onChange={e => setForm(f => ({ ...f, budget: Number(e.target.value) }))}
-              className="budget-slider"
-            />
-            <div className="range-labels"><span>€5</span><span>€150</span></div>
-          </div>
-        )}
+        
 
-        {step === 1 && (
+        {step === 0 && (
           <div className="step-body">
             <h1 className="step-title">Per chi cuciniamo?</h1>
             <div className="stepper">
@@ -322,7 +310,7 @@ const preparazioneAttiva =
           </div>
         )}
 
-        {step === 2 && (
+        {step === 1 && (
           <div className="step-body">
             <h1 className="step-title">Dove fai la spesa?</h1>
             <div className="market-grid">
@@ -340,7 +328,7 @@ const preparazioneAttiva =
           </div>
         )}
 
-        {step === 3 && (
+        {step === 2 && (
           <div className="step-body">
             <h1 className="step-title">I tuoi gusti</h1>
 
@@ -377,11 +365,11 @@ const preparazioneAttiva =
           </div>
         )}
 
-        {step === 4 && (
+        {step === 3 && (
           <div className="step-body">
             <h1 className="step-title">Tutto pronto?</h1>
             <div className="summary-card">
-              <div className="summary-row"><span>Budget</span><strong>€{form.budget}</strong></div>
+              
               <div className="summary-row"><span>Persone</span><strong>{form.persone}</strong></div>
               <div className="summary-row">
   <span>Pasto</span>
