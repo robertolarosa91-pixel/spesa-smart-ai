@@ -41,7 +41,7 @@ const SUPERMARKET_PROFILES = {
   carrefour: 'ipermercato generalista, marchio Carrefour, ampia scelta internazionale'
 };
 
-function buildPrompt({ budget, persone, pasto, preferenze, intolleranze, vegano, supermercato }) {
+function buildPrompt({ persone, pasto, preferenze, intolleranze, vegano, supermercato }) {
   const profilo = SUPERMARKET_PROFILES[supermercato?.toLowerCase()] || 'supermercato generico italiano';
 
   return `Sei un assistente esperto di spesa e cucina italiana. Devi proporre esattamente 4 ricette diverse, sintetiche e realistiche, rispettando rigorosamente questi vincoli.
@@ -49,7 +49,7 @@ function buildPrompt({ budget, persone, pasto, preferenze, intolleranze, vegano,
 DATI:
 - Numero di persone: ${persone}
 - Pasto: ${pasto}
-- Budget massimo PER SINGOLA RICETTA: €${budget}
+
 - Supermercato: ${supermercato} (${profilo})
 - Preferenze alimentari: ${preferenze || 'nessuna preferenza particolare'}
 - Vegano: ${vegano ? 'si' : 'no'}
@@ -57,23 +57,18 @@ DATI:
 
 ISTRUZIONI:
 1. Proponi prodotti realistici per il tipo di supermercato indicato.
-2. Il budget indicato è un TETTO MASSIMO per ogni singola ricetta, non un budget totale.
-3. Il budget deve guidare anche la qualità e la ricchezza della ricetta.
-4. Se il budget è basso, proponi ricette economiche.
-5. Se il budget è medio o alto, proponi ricette più ricche, complete o con ingredienti migliori, senza inventare prezzi falsi.
-6. Per budget fino a €25, il totale_stimato_euro dovrebbe stare idealmente tra il 50% e il 95% del budget.
-7. Per budget tra €26 e €60, il totale_stimato_euro dovrebbe stare idealmente tra il 40% e il 90% del budget.
-8. Per budget oltre €60, proponi ricette premium o più abbondanti, ma resta realistico per il supermercato scelto.
-9. Se non è realistico avvicinarsi al budget con una singola ricetta, non gonfiare i prezzi: proponi comunque una ricetta coerente e spiega nelle note che il budget è superiore al necessario.
-10. Scarta sempre le ricette che superano il budget massimo per singola ricetta.
-11. Se ci sono intolleranze o vegano, escludi ogni ingrediente incompatibile.
-12. Ogni ricetta deve avere la sua lista_spesa specifica.
-13. Non mischiare gli ingredienti di ricette diverse.
-14. Ogni ricetta deve avere il suo totale_stimato_euro.
-15. Ogni ricetta deve avere una difficolta: "Facile", "Media" oppure "Difficile".
-16. Ogni ricetta deve avere una preparazione_step_by_step con 4-6 passaggi chiari, pratici e specifici per quella ricetta.
-17. Mantieni ogni descrizione breve e ogni lista_spesa essenziale, massimo 6 prodotti per ricetta.
-18. Rispondi SOLO in JSON valido, senza testo fuori dal JSON. Non inserire virgole finali dopo l'ultimo elemento di array o oggetti.
+2. Proponi ricette realistiche, convenienti e sensate per il numero di persone indicato.
+3. Se il supermercato è un discount, usa prodotti economici e marche compatibili.
+4. Se il supermercato è di fascia medio-alta, puoi proporre ingredienti leggermente migliori.
+5. Se ci sono intolleranze o vegano, escludi ogni ingrediente incompatibile.
+6. Ogni ricetta deve avere la sua lista_spesa specifica.
+7. Non mischiare gli ingredienti di ricette diverse.
+8. Ogni ricetta deve avere il suo totale_stimato_euro realistico.
+9. Ogni ricetta deve avere una difficolta: "Facile", "Media" oppure "Difficile".
+10. Ogni ricetta deve avere una preparazione_step_by_step con 4-6 passaggi chiari, pratici e specifici per quella ricetta.
+11. Mantieni ogni descrizione breve e ogni lista_spesa essenziale, massimo 6 prodotti per ricetta.
+12. Rispondi SOLO in JSON valido, senza testo fuori dal JSON. Non inserire virgole finali dopo l'ultimo elemento di array o oggetti.
+
 Formato richiesto. Dentro "ricette" devi generare esattamente 4 oggetti come questo esempio:
 {
   "ricette": [
@@ -304,11 +299,11 @@ async function callGemini(prompt) {
 }
 app.post('/api/suggest', async (req, res) => {
   try {
-    const { budget, persone, pasto, supermercato } = req.body;
+    const { persone, pasto, supermercato } = req.body;
 
-    if (!budget || !persone || !pasto || !supermercato) {
-      return res.status(400).json({ error: 'Campi obbligatori mancanti: budget, persone, pasto, supermercato' });
-    }
+    if (!persone || !pasto || !supermercato) {
+  return res.status(400).json({ error: 'Campi obbligatori mancanti: persone, pasto, supermercato' });
+}
 
     const prompt = buildPrompt(req.body);
 
