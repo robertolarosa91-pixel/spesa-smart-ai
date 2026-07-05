@@ -153,10 +153,59 @@ app.post('/api/suggest', async (req, res) => {
       }
     ],
     generationConfig: {
-      temperature: 0.7,
-      maxOutputTokens: 4096,
-      responseMimeType: 'application/json'
-    }
+  temperature: 0.4,
+  maxOutputTokens: 4096,
+  responseMimeType: 'application/json',
+  responseSchema: {
+    type: 'OBJECT',
+    properties: {
+      ricette: {
+        type: 'ARRAY',
+        items: {
+          type: 'OBJECT',
+          properties: {
+            nome: { type: 'STRING' },
+            nome_ricerca: { type: 'STRING' },
+            descrizione_breve: { type: 'STRING' },
+            tempo_preparazione_minuti: { type: 'NUMBER' },
+            emoji: { type: 'STRING' }
+          },
+          required: [
+            'nome',
+            'nome_ricerca',
+            'descrizione_breve',
+            'tempo_preparazione_minuti',
+            'emoji'
+          ]
+        }
+      },
+      lista_spesa: {
+        type: 'ARRAY',
+        items: {
+          type: 'OBJECT',
+          properties: {
+            prodotto: { type: 'STRING' },
+            quantita: { type: 'STRING' },
+            prezzo_stimato_euro: { type: 'NUMBER' }
+          },
+          required: [
+            'prodotto',
+            'quantita',
+            'prezzo_stimato_euro'
+          ]
+        }
+      },
+      totale_stimato_euro: { type: 'NUMBER' },
+      note: { type: 'STRING' }
+    },
+    required: [
+      'ricette',
+      'lista_spesa',
+      'totale_stimato_euro',
+      'note'
+    ]
+  }
+}
   })
 });
 
