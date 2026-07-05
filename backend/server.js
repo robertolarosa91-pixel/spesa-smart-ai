@@ -128,7 +128,7 @@ app.post('/api/suggest', async (req, res) => {
     ],
     temperature: 0.7,
     max_tokens: 4096,
-    response_format: { type: 'json_object' }
+    
   })
 });
 
