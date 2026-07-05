@@ -269,9 +269,25 @@ let data;
 try {
   data = await callGemini(prompt);
 } catch (e) {
+  const msg = String(e.message || '');
+
+  if (msg.toLowerCase().includes('quota exceeded')) {
+    return res.status(429).json({
+      error: 'Limite temporaneo raggiunto',
+      details: 'Hai raggiunto il limite gratuito di richieste Gemini. Riprova tra circa 1 minuto.'
+    });
+  }
+
+  if (msg.toLowerCase().includes('high demand')) {
+    return res.status(503).json({
+      error: 'AI momentaneamente occupata',
+      details: 'Gemini è molto richiesto in questo momento. Riprova tra qualche minuto.'
+    });
+  }
+
   return res.status(502).json({
     error: 'Errore nella chiamata AI',
-    details: e.message
+    details: msg
   });
 }
 
