@@ -77,6 +77,37 @@ ISTRUZIONI:
 }`;
 }
 
+function cleanAIText(text) {
+  return String(text || '')
+    .replace(/```json/gi, '')
+    .replace(/```/g, '')
+    .replace(/^\s*json\s*/i, '')
+    .trim();
+}
+
+function extractJsonObject(text) {
+  let cleaned = cleanAIText(text);
+
+  const start = cleaned.indexOf('{');
+  const end = cleaned.lastIndexOf('}');
+
+  if (start === -1 || end === -1 || end <= start) {
+    throw new Error('Nessun oggetto JSON trovato');
+  }
+
+  cleaned = cleaned.slice(start, end + 1);
+
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    cleaned = cleaned
+      .replace(/,\s*}/g, '}')
+      .replace(/,\s*]/g, ']')
+      .replace(/:\s*(\d+),(\d+)/g, ': $1.$2');
+
+    return JSON.parse(cleaned);
+  }
+}
 
 async function cercaImmagineRicetta(nome) {
   try {
@@ -144,26 +175,18 @@ const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
     }
 
     let parsed;
-    try {
-      let cleaned = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
-      const inizio = cleaned.indexOf('{');
-      const fine = cleaned.lastIndexOf('}');
-      if (inizio !== -1 && fine !== -1) {
-        cleaned = cleaned.slice(inizio, fine + 1);
-      }
-      try {
-  parsed = JSON.parse(cleaned);
-} catch {
-  cleaned = cleaned
-    .replace(/,\s*}/g, '}')
-    .replace(/,\s*]/g, ']');
 
-  parsed = JSON.parse(cleaned);
+try {
+  parsed = extractJsonObject(rawText);
+} catch (e) {
+  console.error('Errore parsing JSON AI:', e.message);
+  console.error('Testo grezzo ricevuto dall AI:', rawText);
+
+  return res.status(502).json({
+    error: 'Impossibile interpretare la risposta AI come JSON',
+    raw: rawText
+  });
 }
-    } catch (e) {
-      console.error('Testo grezzo ricevuto dall AI:', rawText);
-return res.status(502).json({ error: 'Impossibile interpretare la risposta AI come JSON', raw: rawText });
-    }
 
     const ricetteConImmagini = await Promise.all(
   (parsed.ricette || []).map(async (ricetta) => {
