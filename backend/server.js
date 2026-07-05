@@ -38,7 +38,7 @@ const SUPERMARKET_PROFILES = {
 function buildPrompt({ budget, persone, pasto, preferenze, intolleranze, vegano, supermercato }) {
   const profilo = SUPERMARKET_PROFILES[supermercato?.toLowerCase()] || 'supermercato generico italiano';
 
-  return `Sei un assistente esperto di spesa e cucina italiana. Devi proporre 10 ricette diverse, rispettando rigorosamente questi vincoli.
+  return `Sei un assistente esperto di spesa e cucina italiana. Devi proporre esattamente 10 ricette diverse, sintetiche e realistiche, rispettando rigorosamente questi vincoli.
 
 DATI:
 - Numero di persone: ${persone}
@@ -59,9 +59,10 @@ ISTRUZIONI:
 7. Ogni ricetta deve avere la sua lista_spesa specifica.
 8. Non mischiare gli ingredienti di ricette diverse.
 9. Ogni ricetta deve avere il suo totale_stimato_euro.
-10. Ogni ricetta deve avere una preparazione_step_by_step con 5-8 passaggi chiari, pratici e specifici per quella ricetta, non generici e non copiati dall'esempio.
+10. Ogni ricetta deve avere una preparazione_step_by_step con 4-6 passaggi chiari, pratici e specifici per quella ricetta, non generici e non copiati dall'esempio.
 11. Rispondi SOLO in JSON valido, senza testo fuori dal JSON. Non inserire virgole finali dopo l'ultimo elemento di array o oggetti.
 Formato richiesto:
+12. Mantieni ogni descrizione breve e ogni lista_spesa essenziale, massimo 6 prodotti per ricetta.
 
 {
   "ricette": [
@@ -201,7 +202,7 @@ const geminiResponse = await fetch(GEMINI_URL, {
     ],
     generationConfig: {
       temperature: 0.4,
-      maxOutputTokens: 4096,
+      maxOutputTokens: 12000,
       responseMimeType: 'application/json',
       responseSchema: {
         type: 'OBJECT',
