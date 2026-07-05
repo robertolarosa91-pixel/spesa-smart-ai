@@ -423,3 +423,34 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Int
   margin: 0;
   line-height: 1.45;
 }
+
+
+.recipe-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.recipe-pagination button {
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 999px;
+  background: #247c69;
+  color: white;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.recipe-pagination button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.recipe-pagination span {
+  font-weight: 700;
+  color: #247c69;
+}
