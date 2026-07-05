@@ -141,7 +141,12 @@ const preparazioneAttiva =
                 <div className="card-body">
                   <h3>{r.nome}</h3>
                   <p>{r.descrizione_breve}</p>
-                  <span className="tempo">⏱ {r.tempo_preparazione_minuti} min</span>
+                  <div className="recipe-meta">
+  <span className="tempo">⏱ {r.tempo_preparazione_minuti} min</span>
+  <span className={`difficulty difficulty-${(r.difficolta || 'Facile').toLowerCase()}`}>
+    {r.difficolta || 'Facile'}
+  </span>
+</div>
                 </div>
               </div>
              );
