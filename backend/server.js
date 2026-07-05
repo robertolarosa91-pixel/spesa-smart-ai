@@ -192,45 +192,62 @@ return null;
 }
 
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function isErroreTemporaneoGemini(message) {
+  return /high demand|try again later|overloaded|temporar/i.test(String(message || '').toLowerCase());
+}
+
 async function callGemini(prompt) {
   let lastError = null;
 
   for (const model of GEMINI_MODELS) {
-    const response = await fetch(getGeminiUrl(model), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [{ text: prompt }]
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const response = await fetch(getGeminiUrl(model), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: prompt }]
+            }
+          ],
+          generationConfig: {
+            temperature: 0.4,
+            maxOutputTokens: 12000,
+            responseMimeType: 'application/json'
           }
-        ],
-        generationConfig: {
-          temperature: 0.4,
-          maxOutputTokens: 12000,
-          responseMimeType: 'application/json'
-        }
-      })
-    });
+        })
+      });
 
-    let data;
+      let data;
 
-    try {
-      data = await response.json();
-    } catch (err) {
-      lastError = `Risposta non JSON da ${model}: ${err.message}`;
-      console.error(lastError);
-      continue;
+      try {
+        data = await response.json();
+      } catch (err) {
+        lastError = `Risposta non JSON da ${model}: ${err.message}`;
+        console.error(lastError);
+        continue;
+      }
+
+      if (response.ok) {
+        return data;
+      }
+
+      lastError = data?.error?.message || `Errore Gemini HTTP ${response.status}`;
+      console.error(`Gemini API error con ${model}, tentativo ${attempt}:`, lastError);
+
+      if (isErroreTemporaneoGemini(lastError) && attempt < 3) {
+        await sleep(5000 * attempt);
+        continue;
+      }
+
+      break;
     }
-
-    if (response.ok) {
-      return data;
-    }
-
-    lastError = data?.error?.message || `Errore Gemini HTTP ${response.status}`;
-    console.error(`Gemini API error con ${model}:`, lastError);
   }
 
   throw new Error(lastError || 'Errore Gemini');
