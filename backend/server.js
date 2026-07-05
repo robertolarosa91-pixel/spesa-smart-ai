@@ -20,8 +20,7 @@ app.use(express.json());
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODELS = [
-  'gemini-2.5-flash',
-  'gemini-2.0-flash'
+  'gemini-2.5-flash'
 ];
 
 function getGeminiUrl(model) {
@@ -211,73 +210,7 @@ async function callGemini(prompt) {
         generationConfig: {
           temperature: 0.4,
           maxOutputTokens: 12000,
-          responseMimeType: 'application/json',
-          responseSchema: {
-            type: 'OBJECT',
-            properties: {
-              ricette: {
-                type: 'ARRAY',
-                minItems: 6,
-maxItems: 6,
-                items: {
-                  type: 'OBJECT',
-                  properties: {
-                    nome: { type: 'STRING' },
-                    nome_ricerca: { type: 'STRING' },
-                    descrizione_breve: { type: 'STRING' },
-                    tempo_preparazione_minuti: { type: 'NUMBER' },
-                    difficolta: {
-                      type: 'STRING',
-                      enum: ['Facile', 'Media', 'Difficile']
-                    },
-                    emoji: { type: 'STRING' },
-                    preparazione_step_by_step: {
-  type: 'ARRAY',
-  minItems: 4,
-  maxItems: 6,
-                      items: {
-                        type: 'STRING'
-                      }
-                    },
-                    lista_spesa: {
-                      type: 'ARRAY',
-                      maxItems: 6,
-                      items: {
-                        type: 'OBJECT',
-                        properties: {
-                          prodotto: { type: 'STRING' },
-                          quantita: { type: 'STRING' },
-                          prezzo_stimato_euro: { type: 'NUMBER' }
-                        },
-                        required: [
-                          'prodotto',
-                          'quantita',
-                          'prezzo_stimato_euro'
-                        ]
-                      }
-                    },
-                    totale_stimato_euro: { type: 'NUMBER' }
-                  },
-                  required: [
-                    'nome',
-                    'nome_ricerca',
-                    'descrizione_breve',
-                    'tempo_preparazione_minuti',
-                    'difficolta',
-                    'emoji',
-                    'preparazione_step_by_step',
-                    'lista_spesa',
-                    'totale_stimato_euro'
-                  ]
-                }
-              },
-              note: { type: 'STRING' }
-            },
-            required: [
-              'ricette',
-              'note'
-            ]
-          }
+          responseMimeType: 'application/json'
         }
       })
     });
