@@ -503,3 +503,14 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Int
   font-size: 0.82rem;
   font-weight: 700;
 }
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.secondary-btn {
+  background: var(--card);
+  color: var(--sage);
+  border: 2px solid var(--sage);
+}
