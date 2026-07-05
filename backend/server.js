@@ -57,19 +57,23 @@ DATI:
 
 ISTRUZIONI:
 1. Proponi prodotti realistici per il tipo di supermercato indicato.
-2. Il budget indicato è un TETTO MASSIMO per ogni singola ricetta, non un budget totale e non un obiettivo da raggiungere.
-3. Non devi per forza usare tutto il budget: una ricetta da €11 è valida sia con budget €15, sia con budget €30, sia con budget €75.
-4. Se il budget è basso, proponi comunque piatti realistici sotto quel limite.
-5. Scarta solo le ricette che superano il budget massimo per singola ricetta.
-6. Se ci sono intolleranze o vegano, escludi ogni ingrediente incompatibile.
-7. Ogni ricetta deve avere la sua lista_spesa specifica.
-8. Non mischiare gli ingredienti di ricette diverse.
-9. Ogni ricetta deve avere il suo totale_stimato_euro.
-10. Ogni ricetta deve avere una difficolta: "Facile", "Media" oppure "Difficile".
-11. Ogni ricetta deve avere una preparazione_step_by_step con 4-6 passaggi chiari, pratici e specifici per quella ricetta, non generici e non copiati dall'esempio.
-12. Mantieni ogni descrizione breve e ogni lista_spesa essenziale, massimo 6 prodotti per ricetta.
-13. Rispondi SOLO in JSON valido, senza testo fuori dal JSON. Non inserire virgole finali dopo l'ultimo elemento di array o oggetti.
-
+2. Il budget indicato è un TETTO MASSIMO per ogni singola ricetta, non un budget totale.
+3. Il budget deve guidare anche la qualità e la ricchezza della ricetta.
+4. Se il budget è basso, proponi ricette economiche.
+5. Se il budget è medio o alto, proponi ricette più ricche, complete o con ingredienti migliori, senza inventare prezzi falsi.
+6. Per budget fino a €25, il totale_stimato_euro dovrebbe stare idealmente tra il 50% e il 95% del budget.
+7. Per budget tra €26 e €60, il totale_stimato_euro dovrebbe stare idealmente tra il 40% e il 90% del budget.
+8. Per budget oltre €60, proponi ricette premium o più abbondanti, ma resta realistico per il supermercato scelto.
+9. Se non è realistico avvicinarsi al budget con una singola ricetta, non gonfiare i prezzi: proponi comunque una ricetta coerente e spiega nelle note che il budget è superiore al necessario.
+10. Scarta sempre le ricette che superano il budget massimo per singola ricetta.
+11. Se ci sono intolleranze o vegano, escludi ogni ingrediente incompatibile.
+12. Ogni ricetta deve avere la sua lista_spesa specifica.
+13. Non mischiare gli ingredienti di ricette diverse.
+14. Ogni ricetta deve avere il suo totale_stimato_euro.
+15. Ogni ricetta deve avere una difficolta: "Facile", "Media" oppure "Difficile".
+16. Ogni ricetta deve avere una preparazione_step_by_step con 4-6 passaggi chiari, pratici e specifici per quella ricetta.
+17. Mantieni ogni descrizione breve e ogni lista_spesa essenziale, massimo 6 prodotti per ricetta.
+18. Rispondi SOLO in JSON valido, senza testo fuori dal JSON. Non inserire virgole finali dopo l'ultimo elemento di array o oggetti.
 Formato richiesto. Dentro "ricette" devi generare esattamente 4 oggetti come questo esempio:
 {
   "ricette": [
