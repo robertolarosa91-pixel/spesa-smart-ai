@@ -6,9 +6,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = 'gemini-flash-latest';
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+const OPENROUTER_MODEL = 'google/gemini-2.0-flash-exp:free';
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const SERPAPI_KEY = process.env.SERPAPI_KEY;
 
 
@@ -98,29 +98,39 @@ app.post('/api/suggest', async (req, res) => {
 
     const prompt = buildPrompt(req.body);
 
-    const geminiResponse = await fetch(GEMINI_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-goog-api-key': GEMINI_API_KEY
-      },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, responseMimeType: 'application/json', maxOutputTokens: 4096 }
-      })
-    });
+    const aiResponse = await fetch(OPENROUTER_URL, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+    'HTTP-Referer': 'https://spesa-smart-ai.vercel.app',
+    'X-Title': 'Spesa Smart AI'
+  },
+  body: JSON.stringify({
+    model: OPENROUTER_MODEL,
+    messages: [
+      {
+        role: 'user',
+        content: prompt
+      }
+    ],
+    temperature: 0.7,
+    max_tokens: 4096,
+    response_format: { type: 'json_object' }
+  })
+});
 
-    if (!geminiResponse.ok) {
-      const errText = await geminiResponse.text();
-      console.error('Gemini API error:', errText);
-      return res.status(502).json({ error: 'Errore nella chiamata a Gemini', details: errText });
-    }
+if (!aiResponse.ok) {
+  const errText = await aiResponse.text();
+  console.error('OpenRouter API error:', errText);
+  return res.status(502).json({ error: 'Errore nella chiamata AI', details: errText });
+}
 
-    const data = await geminiResponse.json();
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+const data = await aiResponse.json();
+const rawText = data.choices?.[0]?.message?.content;
 
     if (!rawText) {
-      return res.status(502).json({ error: 'Risposta di Gemini vuota o malformata' });
+      return res.status(502).json({ error: 'Risposta AI vuota o malformata' });
     }
 
     let parsed;
@@ -141,8 +151,8 @@ app.post('/api/suggest', async (req, res) => {
   parsed = JSON.parse(cleaned);
 }
     } catch (e) {
-      console.error('Testo grezzo ricevuto da Gemini:', rawText);
-      return res.status(502).json({ error: 'Impossibile interpretare la risposta di Gemini come JSON', raw: rawText });
+      console.error('Testo grezzo ricevuto dall AI:', rawText);
+return res.status(502).json({ error: 'Impossibile interpretare la risposta AI come JSON', raw: rawText });
     }
 
     const ricetteConImmagini = await Promise.all(
