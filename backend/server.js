@@ -18,9 +18,9 @@ app.options('*', cors());
 
 app.use(express.json());
 
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-const OPENROUTER_MODEL = 'deepseek/deepseek-chat-v3-0324:free';
-const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 const SERPAPI_KEY = process.env.SERPAPI_KEY;
 
 
@@ -110,36 +110,34 @@ app.post('/api/suggest', async (req, res) => {
 
     const prompt = buildPrompt(req.body);
 
-    const aiResponse = await fetch(OPENROUTER_URL, {
+    const geminiResponse = await fetch(GEMINI_URL, {
   method: 'POST',
   headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-    'HTTP-Referer': 'https://spesa-smart-ai.vercel.app',
-    'X-Title': 'Spesa Smart AI'
+    'Content-Type': 'application/json'
   },
   body: JSON.stringify({
-    model: OPENROUTER_MODEL,
-    messages: [
+    contents: [
       {
-        role: 'user',
-        content: prompt
+        parts: [{ text: prompt }]
       }
     ],
-    temperature: 0.7,
-    max_tokens: 4096,
-    
+    generationConfig: {
+      temperature: 0.7,
+      maxOutputTokens: 4096,
+      responseMimeType: 'application/json'
+    }
   })
 });
 
-if (!aiResponse.ok) {
-  const errText = await aiResponse.text();
-  console.error('OpenRouter API error:', errText);
-  return res.status(502).json({ error: 'Errore nella chiamata AI', details: errText });
+const data = await geminiResponse.json();
+
+if (!geminiResponse.ok) {
+  const msg = data?.error?.message || `Errore Gemini HTTP ${geminiResponse.status}`;
+  console.error('Gemini API error:', msg);
+  return res.status(502).json({ error: 'Errore nella chiamata AI', details: msg });
 }
 
-const data = await aiResponse.json();
-const rawText = data.choices?.[0]?.message?.content;
+const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
     if (!rawText) {
       return res.status(502).json({ error: 'Risposta AI vuota o malformata' });
