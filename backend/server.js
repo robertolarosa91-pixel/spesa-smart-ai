@@ -38,22 +38,27 @@ const SUPERMARKET_PROFILES = {
 function buildPrompt({ budget, persone, pasto, preferenze, intolleranze, vegano, supermercato }) {
   const profilo = SUPERMARKET_PROFILES[supermercato?.toLowerCase()] || 'supermercato generico italiano';
 
-  return `Sei un assistente esperto di spesa e cucina italiana. Devi proporre una lista della spesa e 1-2 ricette abbinate, rispettando rigorosamente questi vincoli.
+  return `Sei un assistente esperto di spesa e cucina italiana. Devi proporre 1-2 ricette abbinate, rispettando rigorosamente questi vincoli.
 
 DATI:
 - Numero di persone: ${persone}
 - Pasto: ${pasto}
-- Budget massimo totale: €${budget}
+- Budget massimo per singola ricetta: €${budget}
 - Supermercato: ${supermercato} (${profilo})
 - Preferenze alimentari: ${preferenze || 'nessuna preferenza particolare'}
 - Vegano: ${vegano ? 'si' : 'no'}
 - Intolleranze/allergie da evitare assolutamente: ${intolleranze || 'nessuna'}
 
 ISTRUZIONI:
-1. Proponi prodotti realistici per il tipo di supermercato indicato (marche proprie tipiche di quella catena quando plausibile).
-2. Il totale stimato NON deve superare il budget indicato.
-3. Se ci sono intolleranze o vegano, escludi categoricamente ogni ingrediente incompatibile.
-4. Rispondi SOLO in formato JSON valido, nessun testo fuori dal JSON, con questa struttura esatta:
+1. Proponi prodotti realistici per il tipo di supermercato indicato.
+2. Ogni singola ricetta deve rispettare il budget massimo indicato.
+3. Se ci sono intolleranze o vegano, escludi ogni ingrediente incompatibile.
+4. Ogni ricetta deve avere la sua lista_spesa specifica.
+5. Non mischiare gli ingredienti di ricette diverse.
+6. Ogni ricetta deve avere il suo totale_stimato_euro.
+7. Rispondi SOLO in JSON valido, senza testo fuori dal JSON.
+
+Formato richiesto:
 
 {
   "ricette": [
@@ -62,17 +67,17 @@ ISTRUZIONI:
       "nome_ricerca": "Gnocchi alla sorrentina",
       "descrizione_breve": "Gnocchi con sugo di pomodoro, mozzarella e basilico.",
       "tempo_preparazione_minuti": 25,
-      "emoji": "🍝"
+      "emoji": "🍝",
+      "lista_spesa": [
+        {
+          "prodotto": "Gnocchi di patate",
+          "quantita": "1 confezione",
+          "prezzo_stimato_euro": 1.49
+        }
+      ],
+      "totale_stimato_euro": 8.50
     }
   ],
-  "lista_spesa": [
-    {
-      "prodotto": "Gnocchi di patate",
-      "quantita": "1 confezione",
-      "prezzo_stimato_euro": 1.49
-    }
-  ],
-  "totale_stimato_euro": 12.50,
   "note": "Prezzi stimati, controllare eventuali offerte."
 }`;
 }
@@ -153,7 +158,7 @@ app.post('/api/suggest', async (req, res) => {
 
     const prompt = buildPrompt(req.body);
 
-    const geminiResponse = await fetch(GEMINI_URL, {
+const geminiResponse = await fetch(GEMINI_URL, {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json'
@@ -165,62 +170,61 @@ app.post('/api/suggest', async (req, res) => {
       }
     ],
     generationConfig: {
-  temperature: 0.4,
-  maxOutputTokens: 4096,
-  responseMimeType: 'application/json',
-  responseSchema: {
-    type: 'OBJECT',
-    properties: {
-      ricette: {
-        type: 'ARRAY',
-        items: {
-          type: 'OBJECT',
-          properties: {
-            nome: { type: 'STRING' },
-            nome_ricerca: { type: 'STRING' },
-            descrizione_breve: { type: 'STRING' },
-            tempo_preparazione_minuti: { type: 'NUMBER' },
-            emoji: { type: 'STRING' }
+      temperature: 0.4,
+      maxOutputTokens: 4096,
+      responseMimeType: 'application/json',
+      responseSchema: {
+        type: 'OBJECT',
+        properties: {
+          ricette: {
+            type: 'ARRAY',
+            items: {
+              type: 'OBJECT',
+              properties: {
+                nome: { type: 'STRING' },
+                nome_ricerca: { type: 'STRING' },
+                descrizione_breve: { type: 'STRING' },
+                tempo_preparazione_minuti: { type: 'NUMBER' },
+                emoji: { type: 'STRING' },
+                lista_spesa: {
+                  type: 'ARRAY',
+                  items: {
+                    type: 'OBJECT',
+                    properties: {
+                      prodotto: { type: 'STRING' },
+                      quantita: { type: 'STRING' },
+                      prezzo_stimato_euro: { type: 'NUMBER' }
+                    },
+                    required: [
+                      'prodotto',
+                      'quantita',
+                      'prezzo_stimato_euro'
+                    ]
+                  }
+                },
+                totale_stimato_euro: { type: 'NUMBER' }
+              },
+              required: [
+                'nome',
+                'nome_ricerca',
+                'descrizione_breve',
+                'tempo_preparazione_minuti',
+                'emoji',
+                'lista_spesa',
+                'totale_stimato_euro'
+              ]
+            }
           },
-          required: [
-            'nome',
-            'nome_ricerca',
-            'descrizione_breve',
-            'tempo_preparazione_minuti',
-            'emoji'
-          ]
-        }
-      },
-      lista_spesa: {
-        type: 'ARRAY',
-        items: {
-          type: 'OBJECT',
-          properties: {
-            prodotto: { type: 'STRING' },
-            quantita: { type: 'STRING' },
-            prezzo_stimato_euro: { type: 'NUMBER' }
-          },
-          required: [
-            'prodotto',
-            'quantita',
-            'prezzo_stimato_euro'
-          ]
-        }
-      },
-      totale_stimato_euro: { type: 'NUMBER' },
-      note: { type: 'STRING' }
-    },
-    required: [
-      'ricette',
-      'lista_spesa',
-      'totale_stimato_euro',
-      'note'
-    ]
-  }
-}
+          note: { type: 'STRING' }
+        },
+        required: [
+          'ricette',
+          'note'
+        ]
+      }
+    }
   })
 });
-
 const data = await geminiResponse.json();
 
 if (!geminiResponse.ok) {
