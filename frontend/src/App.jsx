@@ -32,6 +32,7 @@ export default function App() {
   const [risultato, setRisultato] = useState(null);
 const [loading, setLoading] = useState(false);
 const [errore, setErrore] = useState(null);
+const [ricettaSelezionata, setRicettaSelezionata] = useState(0);
 const [prodottiAcquistati, setProdottiAcquistati] = useState({});
 
   function toggleIntolleranza(item) {
@@ -55,6 +56,7 @@ const [prodottiAcquistati, setProdottiAcquistati] = useState({});
     setLoading(true);
     setErrore(null);
     setRisultato(null);
+setRicettaSelezionata(0);
 setProdottiAcquistati({});
 
     try {
@@ -77,11 +79,16 @@ setProdottiAcquistati({});
   function resetTutto() {
   setRisultato(null);
   setProdottiAcquistati({});
+  setRicettaSelezionata(0);
   setStep(0);
 }
 
   if (risultato) {
-    return (
+  const ricettaAttiva = risultato.ricette?.[ricettaSelezionata];
+  const listaSpesaAttiva = ricettaAttiva?.lista_spesa || risultato.lista_spesa || [];
+  const totaleAttivo = ricettaAttiva?.totale_stimato_euro ?? risultato.totale_stimato_euro;
+
+  return (
       <div className="page">
         <div className="result-hero">
           <span className="eyebrow">Ecco cosa ti serve</span>
@@ -92,7 +99,19 @@ setProdottiAcquistati({});
           <section>
             <h2>Ricette</h2>
             {risultato.ricette?.map((r, i) => (
-              <div key={i} className="card recipe-card fade-in" style={{ animationDelay: `${i * 0.08}s` }}>
+              <div
+  key={i}
+  className="card recipe-card fade-in"
+  onClick={() => {
+    setRicettaSelezionata(i);
+    setProdottiAcquistati({});
+  }}
+  style={{
+    animationDelay: `${i * 0.08}s`,
+    cursor: 'pointer',
+    border: ricettaSelezionata === i ? '2px solid #247c69' : undefined
+  }}
+>
                 <div className="card-visual">
                   {r.immagine ? (
                     <img className="card-image" src={r.immagine} alt={r.nome} />
@@ -111,10 +130,11 @@ setProdottiAcquistati({});
           </section>
 
           <section>
-            <h2>Lista della spesa</h2>
+            <h2>Lista della spesa {ricettaAttiva?.nome ? `— ${ricettaAttiva.nome}` : ''}</h2>
             <ul className="lista-spesa">
-              {risultato.lista_spesa?.map((p, i) => {
+              {listaSpesaAttiva?.map((p, i) => {
   const acquistato = !!prodottiAcquistati[i];
+  const prezzo = Number(p.prezzo_stimato_euro || 0);
 
   return (
     <li
@@ -141,14 +161,14 @@ setProdottiAcquistati({});
           textDecoration: acquistato ? 'line-through' : 'none'
         }}
       >
-        €{p.prezzo_stimato_euro?.toFixed(2)}
+        €{prezzo.toFixed(2)}
       </span>
     </li>
   );
 })}
             </ul>
             <div className="totale">
-              Totale stimato <strong>€{risultato.totale_stimato_euro?.toFixed(2)}</strong>
+              Totale stimato <strong>€{totaleAttivo?.toFixed(2)}</strong>
               <span className="totale-budget"> / budget €{form.budget}</span>
             </div>
             {risultato.note && <p className="note">{risultato.note}</p>}
