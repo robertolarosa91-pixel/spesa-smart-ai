@@ -121,11 +121,23 @@ async function cercaImmagineRicetta(nome) {
 
     const immagini = data.images_results || [];
 
-    if (immagini.length > 0) {
-      return immagini[0].original || immagini[0].thumbnail || null;
-    }
+const immagineValida = immagini.find(img =>
+  img.thumbnail && img.thumbnail.startsWith('http')
+);
 
-    return null;
+if (immagineValida) {
+  return immagineValida.thumbnail;
+}
+
+const originaleValida = immagini.find(img =>
+  img.original && img.original.startsWith('http')
+);
+
+if (originaleValida) {
+  return originaleValida.original;
+}
+
+return null;
   } catch (err) {
     console.error('Errore SerpAPI:', err.message);
     return null;
