@@ -64,7 +64,7 @@ ISTRUZIONI:
 12. Mantieni ogni descrizione breve e ogni lista_spesa essenziale, massimo 6 prodotti per ricetta.
 13. Rispondi SOLO in JSON valido, senza testo fuori dal JSON. Non inserire virgole finali dopo l'ultimo elemento di array o oggetti.
 
-Formato richiesto:
+Formato richiesto. Dentro "ricette" devi generare esattamente 4 oggetti come questo esempio:
 {
   "ricette": [
     {
@@ -210,8 +210,10 @@ const geminiResponse = await fetch(GEMINI_URL, {
         type: 'OBJECT',
         properties: {
           ricette: {
-            type: 'ARRAY',
-            items: {
+  type: 'ARRAY',
+  minItems: 4,
+  maxItems: 4,
+  items: {
               type: 'OBJECT',
               properties: {
                 nome: { type: 'STRING' },
@@ -225,12 +227,15 @@ difficolta: {
 emoji: { type: 'STRING' },
 preparazione_step_by_step: {
   type: 'ARRAY',
+  minItems: 4,
+  maxItems: 6,
   items: {
     type: 'STRING'
   }
 },
 lista_spesa: {
                   type: 'ARRAY',
+                  maxItems: 6,
                   items: {
                     type: 'OBJECT',
                     properties: {
