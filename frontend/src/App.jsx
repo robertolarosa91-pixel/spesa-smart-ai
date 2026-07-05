@@ -104,11 +104,27 @@ const preparazioneAttiva =
   [];
 
   return (
-      <div className="page">
-        <div className="result-hero">
-          <span className="eyebrow">Ecco cosa ti serve</span>
-          <h1>La tua spesa è pronta</h1>
-        </div>
+      <div className="result-hero">
+  <span className="eyebrow">Ecco cosa ti serve</span>
+  <h1>La tua spesa è pronta</h1>
+
+  <div className="result-summary">
+    <span>{form.pasto === 'cena' ? 'Cena' : 'Pranzo'}</span>
+    <span>{form.persone} {form.persone === 1 ? 'persona' : 'persone'}</span>
+    <span>{SUPERMERCATI.find(s => s.id === form.supermercato)?.label}</span>
+    <span>Max €{form.budget} per ricetta</span>
+
+    {form.vegano && <span>Vegano</span>}
+
+    {form.intolleranze.length > 0 && (
+      <span>No {form.intolleranze.join(', ')}</span>
+    )}
+
+    {form.preferenze && (
+      <span>{form.preferenze}</span>
+    )}
+  </div>
+</div>
 
         <div className="risultato">
           <section>
@@ -228,7 +244,7 @@ const preparazioneAttiva =
             </ul>
             <div className="totale">
   Totale stimato <strong>€{totaleAttivo?.toFixed(2)}</strong>
-  <span className="totale-budget"> / max €{form.budget} per piatto</span>
+  <span className="totale-budget"> / max €{form.budget} per ricetta</span>
 </div>
 
 {preparazioneAttiva?.length > 0 && (
@@ -269,7 +285,7 @@ const preparazioneAttiva =
       <div className="step-content fade-in" key={step}>
         {step === 0 && (
           <div className="step-body">
-            <h1 className="step-title">Budget massimo per piatto?</h1>
+            <h1 className="step-title">Budget massimo per ricetta?</h1>
             <div className="budget-display">Fino a €{form.budget}</div>
             <input
               type="range" min="5" max="150" step="5"
