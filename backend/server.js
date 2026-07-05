@@ -3,7 +3,19 @@ const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
-app.use(cors());
+
+app.use(cors({
+  origin: [
+    'https://spesa-smart-ai.vercel.app',
+    'http://localhost:5173',
+    'http://localhost:3000'
+  ],
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+app.options('*', cors());
+
 app.use(express.json());
 
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
