@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 
 
@@ -36,6 +36,18 @@ const [ricettaSelezionata, setRicettaSelezionata] = useState(0);
 const [paginaRicette, setPaginaRicette] = useState(0);
 const [prodottiAcquistati, setProdottiAcquistati] = useState({});
 
+const [retrySeconds, setRetrySeconds] = useState(0);
+
+useEffect(() => {
+  if (retrySeconds <= 0) return;
+
+  const timer = setTimeout(() => {
+    setRetrySeconds(s => Math.max(0, s - 1));
+  }, 1000);
+
+  return () => clearTimeout(timer);
+}, [retrySeconds]);
+
   function toggleIntolleranza(item) {
     setForm(f => ({
       ...f,
@@ -68,7 +80,13 @@ setProdottiAcquistati({});
         body: JSON.stringify({ ...form, intolleranze: form.intolleranze.join(', ') })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.details || data.error || 'Errore sconosciuto');
+      if (!res.ok) {
+  if (res.status === 429) {
+    setRetrySeconds(data.retryAfterSeconds || 60);
+  }
+
+  throw new Error(data.details || data.error || 'Errore sconosciuto');
+}
 
       setRisultato(data);
     } catch (err) {
@@ -301,15 +319,19 @@ const preparazioneAttiva =
           </section>
         </div>
 
-        <button className="submit-btn" onClick={generaAltreRicette} disabled={loading}>
-  {loading ? 'Genero nuove ricette...' : 'Genera altre ricette'}
+        <button className="submit-btn" onClick={generaAltreRicette} disabled={loading || retrySeconds > 0}>
+  {loading
+    ? 'Genero nuove ricette...'
+    : retrySeconds > 0
+      ? `Riprova tra ${retrySeconds}s`
+      : 'Genera altre ricette'}
 </button>
 
 <button className="submit-btn secondary-btn" onClick={resetTutto}>
   Ricomincia
 </button>
 
-{errore && <div className="error-box">Errore: {errore}</div>}
+{errore && <div className="error-box">{errore}</div>}
       </div>
     );
   }
@@ -431,9 +453,13 @@ const preparazioneAttiva =
         {step > 0 && <button className="nav-btn nav-back" onClick={back}>Indietro</button>}
         {step < STEPS.length - 1 && <button className="nav-btn nav-next" onClick={next}>Avanti</button>}
         {step === STEPS.length - 1 && (
-          <button className="nav-btn nav-next" onClick={handleSubmit} disabled={loading}>
-            {loading ? 'Sto pensando...' : 'Trova la spesa'}
-          </button>
+          <button className="nav-btn nav-next" onClick={handleSubmit} disabled={loading || retrySeconds > 0}>
+  {loading
+    ? 'Sto pensando...'
+    : retrySeconds > 0
+      ? `Riprova tra ${retrySeconds}s`
+      : 'Trova la spesa'}
+</button>
         )}
       </div>
     </div>
