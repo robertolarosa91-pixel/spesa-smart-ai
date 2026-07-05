@@ -43,13 +43,23 @@ ISTRUZIONI:
 
 {
   "ricette": [
-    {"nome": "string", "nome_ricerca": "il nome classico e riconoscibile del piatto senza aggettivi creativi, es. 'Gnocchi alla sorrentina' invece di 'Gnocchi alla Sorrentina Filanti'", "descrizione_breve": "string", "tempo_preparazione_minuti": number, "emoji": "una singola emoji rappresentativa del piatto"}
+    {
+      "nome": "Gnocchi alla sorrentina",
+      "nome_ricerca": "Gnocchi alla sorrentina",
+      "descrizione_breve": "Gnocchi con sugo di pomodoro, mozzarella e basilico.",
+      "tempo_preparazione_minuti": 25,
+      "emoji": "🍝"
+    }
   ],
   "lista_spesa": [
-    {"prodotto": "string", "quantita": "string", "prezzo_stimato_euro": number}
+    {
+      "prodotto": "Gnocchi di patate",
+      "quantita": "1 confezione",
+      "prezzo_stimato_euro": 1.49
+    }
   ],
-  "totale_stimato_euro": number,
-  "note": "string (es. suggerimenti o avvisi sul budget)"
+  "totale_stimato_euro": 12.50,
+  "note": "Prezzi stimati, controllare eventuali offerte."
 }`;
 }
 
