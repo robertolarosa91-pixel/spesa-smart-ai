@@ -38,7 +38,7 @@ const SUPERMARKET_PROFILES = {
 function buildPrompt({ budget, persone, pasto, preferenze, intolleranze, vegano, supermercato }) {
   const profilo = SUPERMARKET_PROFILES[supermercato?.toLowerCase()] || 'supermercato generico italiano';
 
-  return `Sei un assistente esperto di spesa e cucina italiana. Devi proporre 1-2 ricette abbinate, rispettando rigorosamente questi vincoli.
+  return `Sei un assistente esperto di spesa e cucina italiana. Devi proporre 10 ricette diverse, rispettando rigorosamente questi vincoli.
 
 DATI:
 - Numero di persone: ${persone}
