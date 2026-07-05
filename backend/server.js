@@ -59,7 +59,7 @@ ISTRUZIONI:
 7. Ogni ricetta deve avere la sua lista_spesa specifica.
 8. Non mischiare gli ingredienti di ricette diverse.
 9. Ogni ricetta deve avere il suo totale_stimato_euro.
-10. Ogni ricetta deve avere una preparazione_step_by_step con 5-8 passaggi chiari e pratici.
+10. Ogni ricetta deve avere una preparazione_step_by_step con 5-8 passaggi chiari, pratici e specifici per quella ricetta, non generici e non copiati dall'esempio.
 11. Rispondi SOLO in JSON valido, senza testo fuori dal JSON.
 Formato richiesto:
 
@@ -72,12 +72,11 @@ Formato richiesto:
       "tempo_preparazione_minuti": 25,
       "emoji": "🍝",
 "preparazione_step_by_step": [
-  "Porta a ebollizione una pentola d'acqua salata.",
-  "Cuoci gli gnocchi seguendo i tempi indicati sulla confezione.",
-  "Scalda il sugo di pomodoro in una padella.",
-  "Scola gli gnocchi appena salgono a galla.",
-  "Unisci gnocchi, sugo e mozzarella.",
-  "Lascia sciogliere la mozzarella e servi caldo."
+  "Passaggio pratico 1 specifico per questa ricetta.",
+  "Passaggio pratico 2 specifico per questa ricetta.",
+  "Passaggio pratico 3 specifico per questa ricetta.",
+  "Passaggio pratico 4 specifico per questa ricetta.",
+  "Passaggio pratico 5 specifico per questa ricetta."
 ],
 "lista_spesa": [
         {
