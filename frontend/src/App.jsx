@@ -30,8 +30,9 @@ export default function App() {
     intolleranze: []
   });
   const [risultato, setRisultato] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [errore, setErrore] = useState(null);
+const [loading, setLoading] = useState(false);
+const [errore, setErrore] = useState(null);
+const [prodottiAcquistati, setProdottiAcquistati] = useState({});
 
   function toggleIntolleranza(item) {
     setForm(f => ({
@@ -44,11 +45,17 @@ export default function App() {
 
   function next() { setStep(s => Math.min(s + 1, STEPS.length - 1)); }
   function back() { setStep(s => Math.max(s - 1, 0)); }
-
+  function toggleProdottoAcquistato(index) {
+  setProdottiAcquistati(prev => ({
+    ...prev,
+    [index]: !prev[index]
+  }));
+}
   async function handleSubmit() {
     setLoading(true);
     setErrore(null);
     setRisultato(null);
+setProdottiAcquistati({});
 
     try {
       const res = await fetch(`${API_URL}/api/suggest`, {
@@ -68,9 +75,10 @@ export default function App() {
   }
 
   function resetTutto() {
-    setRisultato(null);
-    setStep(0);
-  }
+  setRisultato(null);
+  setProdottiAcquistati({});
+  setStep(0);
+}
 
   if (risultato) {
     return (
@@ -105,12 +113,39 @@ export default function App() {
           <section>
             <h2>Lista della spesa</h2>
             <ul className="lista-spesa">
-              {risultato.lista_spesa?.map((p, i) => (
-                <li key={i} className="fade-in" style={{ animationDelay: `${i * 0.05}s` }}>
-                  <span>{p.prodotto} — {p.quantita}</span>
-                  <span className="prezzo">€{p.prezzo_stimato_euro?.toFixed(2)}</span>
-                </li>
-              ))}
+              {risultato.lista_spesa?.map((p, i) => {
+  const acquistato = !!prodottiAcquistati[i];
+
+  return (
+    <li
+      key={i}
+      className="fade-in"
+      onClick={() => toggleProdottoAcquistato(i)}
+      style={{
+        animationDelay: `${i * 0.05}s`,
+        cursor: 'pointer',
+        opacity: acquistato ? 0.45 : 1
+      }}
+    >
+      <span
+        style={{
+          textDecoration: acquistato ? 'line-through' : 'none'
+        }}
+      >
+        {p.prodotto} — {p.quantita}
+      </span>
+
+      <span
+        className="prezzo"
+        style={{
+          textDecoration: acquistato ? 'line-through' : 'none'
+        }}
+      >
+        €{p.prezzo_stimato_euro?.toFixed(2)}
+      </span>
+    </li>
+  );
+})}
             </ul>
             <div className="totale">
               Totale stimato <strong>€{risultato.totale_stimato_euro?.toFixed(2)}</strong>
