@@ -85,8 +85,13 @@ setProdottiAcquistati({});
 
   if (risultato) {
   const ricettaAttiva = risultato.ricette?.[ricettaSelezionata];
-  const listaSpesaAttiva = ricettaAttiva?.lista_spesa || risultato.lista_spesa || [];
-  const totaleAttivo = ricettaAttiva?.totale_stimato_euro ?? risultato.totale_stimato_euro;
+const listaSpesaAttiva = ricettaAttiva?.lista_spesa || risultato.lista_spesa || [];
+const totaleAttivo = ricettaAttiva?.totale_stimato_euro ?? risultato.totale_stimato_euro;
+const preparazioneAttiva =
+  ricettaAttiva?.preparazione_step_by_step ||
+  ricettaAttiva?.preparazione ||
+  ricettaAttiva?.procedimento ||
+  [];
 
   return (
       <div className="page">
@@ -168,10 +173,26 @@ setProdottiAcquistati({});
 })}
             </ul>
             <div className="totale">
-              Totale stimato <strong>€{totaleAttivo?.toFixed(2)}</strong>
-              <span className="totale-budget"> / budget €{form.budget}</span>
-            </div>
-            {risultato.note && <p className="note">{risultato.note}</p>}
+  Totale stimato <strong>€{totaleAttivo?.toFixed(2)}</strong>
+  <span className="totale-budget"> / budget €{form.budget}</span>
+</div>
+
+{preparazioneAttiva?.length > 0 && (
+  <div className="preparazione-box fade-in">
+    <h2>Guida di preparazione</h2>
+
+    <ol className="preparazione-lista">
+      {preparazioneAttiva.map((step, i) => (
+        <li key={i}>
+          <span className="step-number">{i + 1}</span>
+          <p>{step}</p>
+        </li>
+      ))}
+    </ol>
+  </div>
+)}
+
+{risultato.note && <p className="note">{risultato.note}</p>}
           </section>
         </div>
 
