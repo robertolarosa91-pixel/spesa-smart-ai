@@ -68,7 +68,7 @@ setProdottiAcquistati({});
         body: JSON.stringify({ ...form, intolleranze: form.intolleranze.join(', ') })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Errore sconosciuto');
+      if (!res.ok) throw new Error(data.details || data.error || 'Errore sconosciuto');
 
       setRisultato(data);
     } catch (err) {
@@ -102,7 +102,7 @@ async function generaAltreRicette() {
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Errore sconosciuto');
+    if (!res.ok) throw new Error(data.details || data.error || 'Errore sconosciuto');
 
     setRisultato(data);
   } catch (err) {
