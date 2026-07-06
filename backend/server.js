@@ -636,25 +636,19 @@ let data;
 try {
   data = await callGemini(prompt);
 } catch (e) {
-  const msg = String(e.message || '');
+  const msg = String(e.message || '').toLowerCase();
 
- if (msg.toLowerCase().includes('quota exceeded')) {
-  const fallback = buildFallbackResponse(req.body);
+  const eErroreDaGestireConFallback =
+    /quota|exceeded|high demand|overloaded|resource_exhausted|unavailable|timeout/i.test(msg);
 
-  return res.json({
-    ...fallback,
-    fallback: true
-  });
-}
+  if (eErroreDaGestireConFallback) {
+    const fallback = buildFallbackResponse(req.body);
 
-if (msg.toLowerCase().includes('high demand')) {
-  const fallback = buildFallbackResponse(req.body);
-
-  return res.json({
-    ...fallback,
-    fallback: true
-  });
-}
+    return res.json({
+      ...fallback,
+      fallback: true
+    });
+  }
 
   return res.status(502).json({
     error: 'Errore nella chiamata AI',
