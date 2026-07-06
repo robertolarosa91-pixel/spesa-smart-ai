@@ -28,21 +28,7 @@ function getGeminiUrl(model) {
 }
 const SERPAPI_KEY = process.env.SERPAPI_KEY;
 
-let aiRetryUntil = 0;
 
-function getAiCooldownSeconds() {
-  const remaining = aiRetryUntil - Date.now();
-  return remaining > 0 ? Math.ceil(remaining / 1000) : 0;
-}
-
-function setAiCooldown(seconds) {
-  aiRetryUntil = Date.now() + seconds * 1000;
-}
-
-function extractRetrySeconds(message) {
-  const match = String(message || '').match(/retry in\s+([\d.]+)s/i);
-  return match ? Math.ceil(Number(match[1])) + 10 : 60;
-}
 
 
 
@@ -297,8 +283,8 @@ try {
   const msg = String(e.message || '');
 
  if (msg.toLowerCase().includes('quota exceeded')) {
-  const retrySeconds = extractRetrySeconds(msg);
-  setAiCooldown(retrySeconds);
+  const retryMatch = msg.match(/retry in\s+([\d.]+)s/i);
+  const retrySeconds = retryMatch ? Math.ceil(Number(retryMatch[1])) + 5 : 60;
 
   return res.status(429).json({
     error: 'Troppe richieste al momento',
