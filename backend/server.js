@@ -262,15 +262,7 @@ app.post('/api/suggest', async (req, res) => {
   return res.status(400).json({ error: 'Campi obbligatori mancanti: persone, pasto, supermercato' });
 }
 
-const cooldownSeconds = getAiCooldownSeconds();
 
-if (cooldownSeconds > 0) {
-  return res.status(429).json({
-    error: 'Troppe richieste al momento',
-    details: `Troppe richieste al momento. Riprova tra ${cooldownSeconds} secondi.`,
-    retryAfterSeconds: cooldownSeconds
-  });
-}
     const prompt = buildPrompt(req.body);
 
 
