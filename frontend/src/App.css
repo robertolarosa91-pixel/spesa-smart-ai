@@ -514,3 +514,13 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Int
   color: var(--sage);
   border: 2px solid var(--sage);
 }
+
+.result-actions {
+  display: grid;
+  gap: 10px;
+  margin: 1.4rem 0 2rem;
+}
+
+.result-actions .submit-btn {
+  margin-top: 0;
+}
