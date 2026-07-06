@@ -194,6 +194,22 @@ const preparazioneAttiva =
   </div>
 </div>
 
+<div className="result-actions">
+  <button className="submit-btn" onClick={generaAltreRicette} disabled={loading || retrySeconds > 0}>
+    {loading
+      ? 'Genero nuove ricette...'
+      : retrySeconds > 0
+        ? `Riprova tra ${retrySeconds}s`
+        : 'Genera altre ricette'}
+  </button>
+
+  <button className="submit-btn secondary-btn" onClick={resetTutto}>
+    Ricomincia
+  </button>
+
+  {errore && <div className="error-box">{errore}</div>}
+</div>
+
         <div className="risultato">
           <section>
             <h2>Ricette</h2>
@@ -334,19 +350,7 @@ const preparazioneAttiva =
           </section>
         </div>
 
-        <button className="submit-btn" onClick={generaAltreRicette} disabled={loading || retrySeconds > 0}>
-  {loading
-    ? 'Genero nuove ricette...'
-    : retrySeconds > 0
-      ? `Riprova tra ${retrySeconds}s`
-      : 'Genera altre ricette'}
-</button>
-
-<button className="submit-btn secondary-btn" onClick={resetTutto}>
-  Ricomincia
-</button>
-
-{errore && <div className="error-box">{errore}</div>}
+        
       </div>
     );
   }
