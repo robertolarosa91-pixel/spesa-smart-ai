@@ -272,10 +272,13 @@ try {
   const msg = String(e.message || '');
 
   if (msg.toLowerCase().includes('quota exceeded')) {
+  const retryMatch = msg.match(/retry in\s+([\d.]+)s/i);
+  const retrySeconds = retryMatch ? Math.ceil(Number(retryMatch[1])) : 60;
+
   return res.status(429).json({
     error: 'Troppe richieste al momento',
-    details: 'Troppe richieste al momento. Riprova tra 1 minuto.',
-    retryAfterSeconds: 60
+    details: `Troppe richieste al momento. Riprova tra ${retrySeconds} secondi.`,
+    retryAfterSeconds: retrySeconds
   });
 }
 
