@@ -20,15 +20,15 @@ app.use(express.json());
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODELS = [
-  'gemini-2.5-flash',
   'gemini-2.5-flash-lite',
-  'gemini-2.0-flash'
+  'gemini-2.0-flash',
+  'gemini-2.5-flash'
 ];
 
 function getGeminiUrl(model) {
   return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
 }
-const SERPAPI_KEY = process.env.SERPAPI_KEY;
+// SerpAPI rimossa: ora le immagini arrivano da Wikipedia (gratuita, nessuna chiave richiesta)
 
 
 
@@ -457,42 +457,37 @@ async function cercaImmagineRicetta(nome) {
   if (cacheImmagini.has(chiave)) return cacheImmagini.get(chiave);
 
   try {
-    if (!SERPAPI_KEY) return null;
+    // Primo step: trova il titolo Wikipedia più simile al nome del piatto
+    const controllerRicerca = new AbortController();
+    const timeoutRicerca = setTimeout(() => controllerRicerca.abort(), 8000);
 
-    const query = `${nome} piatto cucina italiana food photography`;
-    const url = `https://serpapi.com/search.json?engine=google_images&q=${encodeURIComponent(query)}&api_key=${SERPAPI_KEY}`;
+    const searchRes = await fetch(
+      `https://it.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(nome)}&gsrlimit=1&prop=pageimages&pithumbsize=400&format=json&origin=*`,
+      { signal: controllerRicerca.signal }
+    );
+    clearTimeout(timeoutRicerca);
 
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
-    const response = await fetch(url, { signal: controller.signal });
-    clearTimeout(timeoutId);
+    if (!searchRes.ok) {
+      cacheImmagini.set(chiave, null);
+      return null;
+    }
 
-    const data = await response.json();
+    const searchData = await searchRes.json();
+    const pages = searchData?.query?.pages;
 
-    const immagini = data.images_results || [];
+    if (!pages) {
+      cacheImmagini.set(chiave, null);
+      return null;
+    }
 
-const immagineValida = immagini.find(img =>
-  img.thumbnail && img.thumbnail.startsWith('http')
-);
+    const primaPagina = Object.values(pages)[0];
+    const immagine = primaPagina?.thumbnail?.source || null;
 
-if (immagineValida) {
-  cacheImmagini.set(chiave, immagineValida.thumbnail);
-  return immagineValida.thumbnail;
-}
-
-const originaleValida = immagini.find(img =>
-  img.original && img.original.startsWith('http')
-);
-
-if (originaleValida) {
-  cacheImmagini.set(chiave, originaleValida.original);
-  return originaleValida.original;
-}
-
-cacheImmagini.set(chiave, null);
-return null;
+    cacheImmagini.set(chiave, immagine);
+    return immagine;
   } catch (err) {
-    console.error('Errore SerpAPI:', err.message);
+    console.error('Errore ricerca immagine Wikipedia:', err.message);
+    cacheImmagini.set(chiave, null);
     return null;
   }
 }
@@ -561,9 +556,16 @@ async function callGemini(prompt) {
       lastError = data?.error?.message || `Errore Gemini HTTP ${response.status}`;
       console.error(`Gemini API error con ${model}, tentativo ${attempt}:`, lastError);
 
+      const quotaEsaurita = /exceeded your current quota|resource_exhausted/i.test(lastError);
+
+      if (quotaEsaurita) {
+        // Quota giornaliera/di modello esaurita: inutile ritentare, passa subito al modello successivo
+        break;
+      }
+
       if (isErroreTemporaneoGemini(response.status, lastError) && attempt < 3) {
         const retryAfterHeader = response.headers.get('retry-after');
-        const attesa = retryAfterHeader ? Number(retryAfterHeader) * 1000 : 4000 * attempt;
+        const attesa = retryAfterHeader ? Number(retryAfterHeader) * 1000 : 3000 * attempt;
         await sleep(attesa);
         continue;
       }
