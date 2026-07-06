@@ -28,6 +28,22 @@ function getGeminiUrl(model) {
 }
 const SERPAPI_KEY = process.env.SERPAPI_KEY;
 
+let aiRetryUntil = 0;
+
+function getAiCooldownSeconds() {
+  const remaining = aiRetryUntil - Date.now();
+  return remaining > 0 ? Math.ceil(remaining / 1000) : 0;
+}
+
+function setAiCooldown(seconds) {
+  aiRetryUntil = Date.now() + seconds * 1000;
+}
+
+function extractRetrySeconds(message) {
+  const match = String(message || '').match(/retry in\s+([\d.]+)s/i);
+  return match ? Math.ceil(Number(match[1])) + 10 : 60;
+}
+
 
 
 const SUPERMARKET_PROFILES = {
@@ -260,6 +276,15 @@ app.post('/api/suggest', async (req, res) => {
   return res.status(400).json({ error: 'Campi obbligatori mancanti: persone, pasto, supermercato' });
 }
 
+const cooldownSeconds = getAiCooldownSeconds();
+
+if (cooldownSeconds > 0) {
+  return res.status(429).json({
+    error: 'Troppe richieste al momento',
+    details: `Troppe richieste al momento. Riprova tra ${cooldownSeconds} secondi.`,
+    retryAfterSeconds: cooldownSeconds
+  });
+}
     const prompt = buildPrompt(req.body);
 
 
@@ -271,9 +296,9 @@ try {
 } catch (e) {
   const msg = String(e.message || '');
 
-  if (msg.toLowerCase().includes('quota exceeded')) {
-  const retryMatch = msg.match(/retry in\s+([\d.]+)s/i);
-const retrySeconds = retryMatch ? Math.ceil(Number(retryMatch[1])) + 5 : 60;
+ if (msg.toLowerCase().includes('quota exceeded')) {
+  const retrySeconds = extractRetrySeconds(msg);
+  setAiCooldown(retrySeconds);
 
   return res.status(429).json({
     error: 'Troppe richieste al momento',
