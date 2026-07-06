@@ -20,7 +20,9 @@ app.use(express.json());
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODELS = [
-  'gemini-2.5-flash'
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite',
+  'gemini-2.0-flash'
 ];
 
 function getGeminiUrl(model) {
@@ -346,7 +348,7 @@ function buildFallbackResponse(body) {
   const ricette = FALLBACK_RICETTE
     .filter(r => !evitare.includes(normalizzaTesto(r.nome)))
     .filter(r => ricettaCompatibileFallback(r, body))
-    .slice(0, 6)
+    .slice(0, 3)
     .map(({ tags, ...ricetta }) => ricetta);
 
   return {
@@ -371,7 +373,7 @@ function buildPrompt({ persone, pasto, preferenze, intolleranze, vegano, superme
   const ricetteDaEvitare = Array.isArray(ricette_da_evitare)
   ? ricette_da_evitare.filter(Boolean).join(', ')
   : '';
-  return `Sei un assistente esperto di spesa e cucina italiana. Devi proporre esattamente 6 ricette diverse, sintetiche e realistiche, rispettando rigorosamente questi vincoli.
+  return `Sei un assistente esperto di spesa e cucina italiana. Devi proporre esattamente 3 ricette diverse, sintetiche e realistiche, rispettando rigorosamente questi vincoli.
 
 DATI:
 - Numero di persone: ${persone}
@@ -521,8 +523,9 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function isErroreTemporaneoGemini(message) {
-  return /high demand|try again later|overloaded|temporar/i.test(String(message || '').toLowerCase());
+function isErroreTemporaneoGemini(status, message) {
+  if (status === 429 || status === 503) return true;
+  return /high demand|try again later|overloaded|temporar|resource_exhausted|unavailable/i.test(String(message || '').toLowerCase());
 }
 
 async function callGemini(prompt) {
@@ -566,8 +569,10 @@ async function callGemini(prompt) {
       lastError = data?.error?.message || `Errore Gemini HTTP ${response.status}`;
       console.error(`Gemini API error con ${model}, tentativo ${attempt}:`, lastError);
 
-      if (isErroreTemporaneoGemini(lastError) && attempt < 3) {
-        await sleep(5000 * attempt);
+      if (isErroreTemporaneoGemini(response.status, lastError) && attempt < 3) {
+        const retryAfterHeader = response.headers.get('retry-after');
+        const attesa = retryAfterHeader ? Number(retryAfterHeader) * 1000 : 4000 * attempt;
+        await sleep(attesa);
         continue;
       }
 
@@ -577,7 +582,26 @@ async function callGemini(prompt) {
 
   throw new Error(lastError || 'Errore Gemini');
 }
-app.post('/api/suggest', async (req, res) => {
+const ultimaRichiestaPerIp = new Map();
+const COOLDOWN_MS = 4000;
+
+function applicaCooldown(req, res, next) {
+  const ip = req.ip;
+  const ora = Date.now();
+  const ultima = ultimaRichiestaPerIp.get(ip) || 0;
+
+  if (ora - ultima < COOLDOWN_MS) {
+    return res.status(429).json({
+      error: 'Troppe richieste ravvicinate',
+      retryAfterSeconds: Math.ceil((COOLDOWN_MS - (ora - ultima)) / 1000)
+    });
+  }
+
+  ultimaRichiestaPerIp.set(ip, ora);
+  next();
+}
+
+app.post('/api/suggest', applicaCooldown, async (req, res) => {
   try {
     const { persone, pasto, supermercato } = req.body;
 
