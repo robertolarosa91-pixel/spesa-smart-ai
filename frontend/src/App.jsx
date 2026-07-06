@@ -120,7 +120,13 @@ async function generaAltreRicette() {
     });
 
     const data = await res.json();
-    if (!res.ok) throw new Error(data.details || data.error || 'Errore sconosciuto');
+    if (!res.ok) {
+  if (res.status === 429) {
+    setRetrySeconds(data.retryAfterSeconds || 60);
+  }
+
+  throw new Error(data.details || data.error || 'Errore sconosciuto');
+}
 
     setRisultato(data);
   } catch (err) {
@@ -444,7 +450,7 @@ const preparazioneAttiva =
               {form.intolleranze.length > 0 && <div className="summary-row"><span>Da evitare</span><strong>{form.intolleranze.join(', ')}</strong></div>}
               {form.preferenze && <div className="summary-row"><span>Gusti</span><strong>{form.preferenze}</strong></div>}
             </div>
-            {errore && <div className="error-box">Errore: {errore}</div>}
+            {errore && <div className="error-box">{errore}</div>}
           </div>
         )}
       </div>
