@@ -28,7 +28,7 @@ const GEMINI_MODELS = [
 function getGeminiUrl(model) {
   return `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
 }
-// SerpAPI rimossa: ora le immagini arrivano da Wikipedia (gratuita, nessuna chiave richiesta)
+const PEXELS_API_KEY = process.env.PEXELS_API_KEY;
 
 
 
@@ -457,36 +457,37 @@ async function cercaImmagineRicetta(nome) {
   if (cacheImmagini.has(chiave)) return cacheImmagini.get(chiave);
 
   try {
-    // Primo step: trova il titolo Wikipedia più simile al nome del piatto
-    const controllerRicerca = new AbortController();
-    const timeoutRicerca = setTimeout(() => controllerRicerca.abort(), 8000);
+    if (!PEXELS_API_KEY) {
+      cacheImmagini.set(chiave, null);
+      return null;
+    }
 
-    const searchRes = await fetch(
-      `https://it.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(nome)}&gsrlimit=1&prop=pageimages&pithumbsize=400&format=json&origin=*`,
-      { signal: controllerRicerca.signal }
+    const query = `${nome} food dish`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+    const response = await fetch(
+      `https://api.pexels.com/v1/search?query=${encodeURIComponent(query)}&per_page=1&orientation=square`,
+      {
+        headers: { Authorization: PEXELS_API_KEY },
+        signal: controller.signal
+      }
     );
-    clearTimeout(timeoutRicerca);
+    clearTimeout(timeoutId);
 
-    if (!searchRes.ok) {
+    if (!response.ok) {
       cacheImmagini.set(chiave, null);
       return null;
     }
 
-    const searchData = await searchRes.json();
-    const pages = searchData?.query?.pages;
-
-    if (!pages) {
-      cacheImmagini.set(chiave, null);
-      return null;
-    }
-
-    const primaPagina = Object.values(pages)[0];
-    const immagine = primaPagina?.thumbnail?.source || null;
+    const data = await response.json();
+    const foto = data.photos?.[0];
+    const immagine = foto?.src?.medium || foto?.src?.small || null;
 
     cacheImmagini.set(chiave, immagine);
     return immagine;
   } catch (err) {
-    console.error('Errore ricerca immagine Wikipedia:', err.message);
+    console.error('Errore ricerca immagine Pexels:', err.message);
     cacheImmagini.set(chiave, null);
     return null;
   }
