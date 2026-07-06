@@ -273,7 +273,7 @@ try {
 
   if (msg.toLowerCase().includes('quota exceeded')) {
   const retryMatch = msg.match(/retry in\s+([\d.]+)s/i);
-  const retrySeconds = retryMatch ? Math.ceil(Number(retryMatch[1])) : 60;
+const retrySeconds = retryMatch ? Math.ceil(Number(retryMatch[1])) + 5 : 60;
 
   return res.status(429).json({
     error: 'Troppe richieste al momento',
@@ -285,7 +285,7 @@ try {
   if (msg.toLowerCase().includes('high demand')) {
     return res.status(503).json({
       error: 'AI momentaneamente occupata',
-      details: 'Gemini è molto richiesto in questo momento. Riprova tra qualche minuto.'
+      details: 'Il servizio è molto richiesto in questo momento. Riprova tra qualche minuto.'
     });
   }
 
