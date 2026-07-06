@@ -39,14 +39,19 @@ const [prodottiAcquistati, setProdottiAcquistati] = useState({});
 const [retrySeconds, setRetrySeconds] = useState(0);
 
 useEffect(() => {
-  if (retrySeconds <= 0) return;
+  if (retrySeconds <= 0) {
+    if (errore?.toLowerCase().includes('troppe richieste')) {
+      setErrore(null);
+    }
+    return;
+  }
 
   const timer = setTimeout(() => {
     setRetrySeconds(s => Math.max(0, s - 1));
   }, 1000);
 
   return () => clearTimeout(timer);
-}, [retrySeconds]);
+}, [retrySeconds, errore]);
 
   function toggleIntolleranza(item) {
     setForm(f => ({
@@ -66,6 +71,7 @@ useEffect(() => {
   }));
 }
   async function handleSubmit() {
+if (retrySeconds > 0) return;
     setLoading(true);
     setErrore(null);
     setRisultato(null);
@@ -97,6 +103,7 @@ setProdottiAcquistati({});
   }
 
 async function generaAltreRicette() {
+  if (retrySeconds > 0) return;
   setLoading(true);
   setErrore(null);
   setRicettaSelezionata(0);
@@ -138,10 +145,12 @@ async function generaAltreRicette() {
 
   function resetTutto() {
   setRisultato(null);
-setProdottiAcquistati({});
-setRicettaSelezionata(0);
-setPaginaRicette(0);
-setStep(0);
+  setProdottiAcquistati({});
+  setRicettaSelezionata(0);
+  setPaginaRicette(0);
+  setErrore(null);
+  setRetrySeconds(0);
+  setStep(0);
 }
 
   if (risultato) {
