@@ -14,6 +14,34 @@
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Inter', sans-serif; }
 
+.auth-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.auth-user {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #52493c;
+  margin-right: auto;
+}
+.auth-btn {
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  border: 2px solid var(--sage);
+  background: var(--sage);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.auth-btn-secondary {
+  background: white;
+  color: var(--sage);
+}
+
 .page {
   max-width: 480px;
   margin: 0 auto;
