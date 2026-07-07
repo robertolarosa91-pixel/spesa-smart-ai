@@ -283,7 +283,112 @@ const FALLBACK_RICETTE = [
   { nome: 'Curry di ceci e spinaci', nome_ricerca: 'Curry di ceci e spinaci', descrizione_breve: 'Piatto vegano speziato con ceci, spinaci e latte di cocco.', tempo_preparazione_minuti: 30, difficolta: 'Media', emoji: '🍛', tags: ['vegano', 'senza_glutine'],
     lista_spesa: [{ prodotto: 'Ceci in barattolo', quantita: '2 confezioni', prezzo_stimato_euro: 1.80 }, { prodotto: 'Spinaci surgelati', quantita: '300g', prezzo_stimato_euro: 1.20 }, { prodotto: 'Latte di cocco', quantita: '400ml', prezzo_stimato_euro: 1.49 }, { prodotto: 'Curry in polvere', quantita: 'q.b.', prezzo_stimato_euro: 0.60 }, { prodotto: 'Riso', quantita: '300g', prezzo_stimato_euro: 0.99 }],
     totale_stimato_euro: 6.08,
-    preparazione_step_by_step: ['Soffriggi il curry in olio per un minuto.', 'Aggiungi ceci e spinaci scongelati.', 'Versa il latte di cocco e mescola.', 'Cuoci a fuoco basso per 15 minuti.', 'Servi caldo con riso basmati.'] }
+    preparazione_step_by_step: ['Soffriggi il curry in olio per un minuto.', 'Aggiungi ceci e spinaci scongelati.', 'Versa il latte di cocco e mescola.', 'Cuoci a fuoco basso per 15 minuti.', 'Servi caldo con riso basmati.'] },
+
+  { nome: 'Pancake allo yogurt', nome_ricerca: 'Pancake allo yogurt', descrizione_breve: 'Pancake soffici perfetti per colazione o merenda.', tempo_preparazione_minuti: 20, difficolta: 'Facile', emoji: '🥞', tags: ['uova', 'lattosio', 'glutine'], pasti: ['colazione', 'merenda'],
+    lista_spesa: [{ prodotto: 'Farina', quantita: '250g', prezzo_stimato_euro: 0.59 }, { prodotto: 'Uova', quantita: '2 pezzi', prezzo_stimato_euro: 0.60 }, { prodotto: 'Yogurt bianco', quantita: '1 vasetto', prezzo_stimato_euro: 0.50 }, { prodotto: 'Miele', quantita: 'q.b.', prezzo_stimato_euro: 1.50 }],
+    totale_stimato_euro: 3.19,
+    preparazione_step_by_step: ['Mescola farina, uova e yogurt fino a un composto liscio.', 'Scalda una padella antiaderente.', 'Versa piccole quantità di composto e cuoci finché si formano bolle.', 'Gira e cuoci l\'altro lato.', 'Servi caldi con miele o marmellata.'] },
+
+  { nome: 'Toast con marmellata e burro', nome_ricerca: 'Toast marmellata e burro', descrizione_breve: 'Colazione classica e velocissima.', tempo_preparazione_minuti: 5, difficolta: 'Facile', emoji: '🍞', tags: ['glutine', 'lattosio'], pasti: ['colazione'],
+    lista_spesa: [{ prodotto: 'Pane in cassetta', quantita: '1 confezione', prezzo_stimato_euro: 1.60 }, { prodotto: 'Burro', quantita: '125g', prezzo_stimato_euro: 1.20 }, { prodotto: 'Marmellata', quantita: '1 vasetto', prezzo_stimato_euro: 1.80 }],
+    totale_stimato_euro: 4.60,
+    preparazione_step_by_step: ['Tosta le fette di pane.', 'Spalma il burro ancora caldo.', 'Aggiungi la marmellata a piacere.', 'Servi subito.'] },
+
+  { nome: 'Porridge di avena con frutta', nome_ricerca: 'Porridge di avena', descrizione_breve: 'Colazione energetica e vegana con avena e frutta fresca.', tempo_preparazione_minuti: 10, difficolta: 'Facile', emoji: '🥣', tags: ['vegano', 'senza_glutine'], pasti: ['colazione'],
+    lista_spesa: [{ prodotto: 'Fiocchi di avena', quantita: '250g', prezzo_stimato_euro: 1.29 }, { prodotto: 'Latte vegetale', quantita: '500ml', prezzo_stimato_euro: 1.19 }, { prodotto: 'Banana', quantita: '2 pezzi', prezzo_stimato_euro: 0.80 }, { prodotto: 'Miele', quantita: 'q.b.', prezzo_stimato_euro: 1.50 }],
+    totale_stimato_euro: 4.78,
+    preparazione_step_by_step: ['Scalda il latte vegetale in un pentolino.', 'Aggiungi i fiocchi di avena e cuoci 5 minuti mescolando.', 'Versa in una ciotola.', 'Aggiungi banana a fette e un filo di miele.', 'Servi caldo o tiepido.'] },
+
+  { nome: 'Muffin ai mirtilli', nome_ricerca: 'Muffin ai mirtilli', descrizione_breve: 'Dolcetti soffici perfetti per colazione o merenda.', tempo_preparazione_minuti: 35, difficolta: 'Media', emoji: '🧁', tags: ['uova', 'lattosio', 'glutine'], pasti: ['colazione', 'merenda', 'dolce'],
+    lista_spesa: [{ prodotto: 'Farina', quantita: '250g', prezzo_stimato_euro: 0.59 }, { prodotto: 'Uova', quantita: '2 pezzi', prezzo_stimato_euro: 0.60 }, { prodotto: 'Zucchero', quantita: '150g', prezzo_stimato_euro: 0.99 }, { prodotto: 'Mirtilli surgelati', quantita: '200g', prezzo_stimato_euro: 2.20 }, { prodotto: 'Burro', quantita: '100g', prezzo_stimato_euro: 0.95 }],
+    totale_stimato_euro: 5.33,
+    preparazione_step_by_step: ['Monta uova e zucchero fino a schiuma chiara.', 'Aggiungi burro fuso e farina setacciata.', 'Incorpora delicatamente i mirtilli.', 'Versa negli stampini per muffin.', 'Cuoci in forno a 180 gradi per 20 minuti.'] },
+
+  { nome: 'Uova strapazzate con toast', nome_ricerca: 'Uova strapazzate', descrizione_breve: 'Colazione salata proteica, pronta in pochi minuti.', tempo_preparazione_minuti: 10, difficolta: 'Facile', emoji: '🍳', tags: ['uova', 'glutine', 'lattosio'], pasti: ['colazione'],
+    lista_spesa: [{ prodotto: 'Uova', quantita: '4 pezzi', prezzo_stimato_euro: 1.50 }, { prodotto: 'Burro', quantita: '20g', prezzo_stimato_euro: 0.30 }, { prodotto: 'Pane in cassetta', quantita: '1 confezione', prezzo_stimato_euro: 1.60 }],
+    totale_stimato_euro: 3.40,
+    preparazione_step_by_step: ['Sbatti le uova con sale e pepe.', 'Sciogli il burro in padella a fuoco basso.', 'Versa le uova e mescola continuamente.', 'Togli dal fuoco quando ancora morbide.', 'Servi con il pane tostato.'] },
+
+  { nome: 'Plumcake allo yogurt', nome_ricerca: 'Plumcake allo yogurt', descrizione_breve: 'Torta soffice da colazione o merenda, semplice da preparare.', tempo_preparazione_minuti: 45, difficolta: 'Facile', emoji: '🍰', tags: ['uova', 'lattosio', 'glutine'], pasti: ['merenda', 'colazione', 'dolce'],
+    lista_spesa: [{ prodotto: 'Farina', quantita: '300g', prezzo_stimato_euro: 0.69 }, { prodotto: 'Yogurt bianco', quantita: '1 vasetto', prezzo_stimato_euro: 0.50 }, { prodotto: 'Uova', quantita: '3 pezzi', prezzo_stimato_euro: 0.90 }, { prodotto: 'Zucchero', quantita: '150g', prezzo_stimato_euro: 0.99 }, { prodotto: 'Olio di semi', quantita: '100ml', prezzo_stimato_euro: 0.80 }],
+    totale_stimato_euro: 3.88,
+    preparazione_step_by_step: ['Monta uova e zucchero fino a ottenere una crema chiara.', 'Aggiungi yogurt e olio, mescola bene.', 'Incorpora la farina setacciata poco alla volta.', 'Versa in uno stampo da plumcake.', 'Cuoci in forno a 180 gradi per 35 minuti.'] },
+
+  { nome: 'Frullato di frutta', nome_ricerca: 'Frullato di frutta fresca', descrizione_breve: 'Merenda fresca, veloce e completamente vegana.', tempo_preparazione_minuti: 5, difficolta: 'Facile', emoji: '🥤', tags: ['vegano', 'senza_glutine'], pasti: ['merenda', 'colazione'],
+    lista_spesa: [{ prodotto: 'Banana', quantita: '2 pezzi', prezzo_stimato_euro: 0.80 }, { prodotto: 'Fragole surgelate', quantita: '200g', prezzo_stimato_euro: 1.50 }, { prodotto: 'Latte vegetale', quantita: '500ml', prezzo_stimato_euro: 1.19 }],
+    totale_stimato_euro: 3.49,
+    preparazione_step_by_step: ['Taglia la banana a pezzi.', 'Metti tutto nel frullatore.', 'Frulla fino a ottenere un composto liscio.', 'Versa in un bicchiere e servi subito.'] },
+
+  { nome: 'Crostatine alla marmellata', nome_ricerca: 'Crostatine alla marmellata', descrizione_breve: 'Piccoli dolci da forno per merenda o colazione.', tempo_preparazione_minuti: 30, difficolta: 'Facile', emoji: '🥧', tags: ['uova', 'lattosio', 'glutine'], pasti: ['merenda', 'dolce'],
+    lista_spesa: [{ prodotto: 'Pasta frolla pronta', quantita: '1 rotolo', prezzo_stimato_euro: 1.49 }, { prodotto: 'Marmellata', quantita: '1 vasetto', prezzo_stimato_euro: 1.80 }, { prodotto: 'Uova', quantita: '1 pezzo', prezzo_stimato_euro: 0.30 }],
+    totale_stimato_euro: 3.59,
+    preparazione_step_by_step: ['Taglia la pasta frolla in dischi.', 'Adagiali negli stampini per crostatine.', 'Riempi con la marmellata.', 'Spennella i bordi con uovo sbattuto.', 'Cuoci in forno a 180 gradi per 20 minuti.'] },
+
+  { nome: 'Pane e nutella', nome_ricerca: 'Pane e nutella', descrizione_breve: 'La merenda più amata, pronta in un minuto.', tempo_preparazione_minuti: 2, difficolta: 'Facile', emoji: '🍫', tags: ['glutine', 'frutta_guscio', 'lattosio'], pasti: ['merenda'],
+    lista_spesa: [{ prodotto: 'Pane casereccio', quantita: '1 filone', prezzo_stimato_euro: 1.50 }, { prodotto: 'Crema di nocciole', quantita: '1 vasetto', prezzo_stimato_euro: 2.99 }],
+    totale_stimato_euro: 4.49,
+    preparazione_step_by_step: ['Taglia una fetta di pane.', 'Spalma la crema di nocciole.', 'Servi subito.'] },
+
+  { nome: 'Tiramisù veloce', nome_ricerca: 'Tiramisù', descrizione_breve: 'Il dolce al cucchiaio italiano più famoso, versione semplificata.', tempo_preparazione_minuti: 25, difficolta: 'Media', emoji: '☕', tags: ['uova', 'lattosio', 'glutine'], pasti: ['dolce'],
+    lista_spesa: [{ prodotto: 'Savoiardi', quantita: '1 confezione', prezzo_stimato_euro: 1.79 }, { prodotto: 'Mascarpone', quantita: '250g', prezzo_stimato_euro: 2.20 }, { prodotto: 'Uova', quantita: '3 pezzi', prezzo_stimato_euro: 0.90 }, { prodotto: 'Caffè', quantita: '1 moka', prezzo_stimato_euro: 0.50 }, { prodotto: 'Cacao amaro', quantita: 'q.b.', prezzo_stimato_euro: 0.80 }],
+    totale_stimato_euro: 6.19,
+    preparazione_step_by_step: ['Prepara il caffè e lascialo raffreddare.', 'Monta i tuorli con lo zucchero, poi unisci il mascarpone.', 'Monta gli albumi a neve e incorporali delicatamente.', 'Inzuppa i savoiardi nel caffè e fai uno strato.', 'Ricopri con la crema, ripeti gli strati e spolvera di cacao.'] },
+
+  { nome: 'Torta di mele', nome_ricerca: 'Torta di mele', descrizione_breve: 'Dolce casalingo semplice e profumato.', tempo_preparazione_minuti: 50, difficolta: 'Facile', emoji: '🍎', tags: ['uova', 'lattosio', 'glutine'], pasti: ['dolce', 'merenda'],
+    lista_spesa: [{ prodotto: 'Farina', quantita: '300g', prezzo_stimato_euro: 0.69 }, { prodotto: 'Mele', quantita: '4 pezzi', prezzo_stimato_euro: 2.00 }, { prodotto: 'Uova', quantita: '3 pezzi', prezzo_stimato_euro: 0.90 }, { prodotto: 'Zucchero', quantita: '150g', prezzo_stimato_euro: 0.99 }, { prodotto: 'Burro', quantita: '100g', prezzo_stimato_euro: 0.95 }],
+    totale_stimato_euro: 5.53,
+    preparazione_step_by_step: ['Sbuccia e taglia le mele a fettine sottili.', 'Monta uova e zucchero, aggiungi burro fuso.', 'Incorpora la farina setacciata.', 'Versa in uno stampo e disponi le mele sopra.', 'Cuoci in forno a 180 gradi per 40 minuti.'] },
+
+  { nome: 'Budino al cioccolato', nome_ricerca: 'Budino al cioccolato', descrizione_breve: 'Dessert cremoso e goloso, facile da preparare.', tempo_preparazione_minuti: 20, difficolta: 'Facile', emoji: '🍫', tags: ['lattosio'], pasti: ['dolce'],
+    lista_spesa: [{ prodotto: 'Latte', quantita: '500ml', prezzo_stimato_euro: 0.89 }, { prodotto: 'Cioccolato fondente', quantita: '150g', prezzo_stimato_euro: 1.99 }, { prodotto: 'Amido di mais', quantita: '30g', prezzo_stimato_euro: 0.60 }, { prodotto: 'Zucchero', quantita: '80g', prezzo_stimato_euro: 0.99 }],
+    totale_stimato_euro: 4.47,
+    preparazione_step_by_step: ['Sciogli il cioccolato a bagnomaria.', 'Scalda il latte con zucchero e amido sciolto.', 'Unisci il cioccolato fuso e mescola bene.', 'Cuoci finché si addensa, mescolando spesso.', 'Versa in coppette e lascia raffreddare in frigo.'] },
+
+  { nome: 'Crostata alla marmellata', nome_ricerca: 'Crostata alla marmellata', descrizione_breve: 'Il dolce della tradizione italiana, semplice e genuino.', tempo_preparazione_minuti: 40, difficolta: 'Facile', emoji: '🥧', tags: ['uova', 'lattosio', 'glutine'], pasti: ['dolce', 'merenda'],
+    lista_spesa: [{ prodotto: 'Pasta frolla pronta', quantita: '1 rotolo', prezzo_stimato_euro: 1.49 }, { prodotto: 'Marmellata', quantita: '1 vasetto grande', prezzo_stimato_euro: 2.50 }, { prodotto: 'Uova', quantita: '1 pezzo', prezzo_stimato_euro: 0.30 }],
+    totale_stimato_euro: 4.29,
+    preparazione_step_by_step: ['Stendi la pasta frolla in una teglia.', 'Farcisci con abbondante marmellata.', 'Ricava delle striscioline con la pasta avanzata.', 'Disponi le strisce a griglia sopra la marmellata.', 'Cuoci in forno a 180 gradi per 30 minuti.'] },
+
+  { nome: 'Mousse al limone', nome_ricerca: 'Mousse al limone', descrizione_breve: 'Dolce al cucchiaio fresco e leggero.', tempo_preparazione_minuti: 20, difficolta: 'Media', emoji: '🍋', tags: ['uova', 'lattosio'], pasti: ['dolce'],
+    lista_spesa: [{ prodotto: 'Panna da montare', quantita: '250ml', prezzo_stimato_euro: 1.50 }, { prodotto: 'Limoni', quantita: '2 pezzi', prezzo_stimato_euro: 1.00 }, { prodotto: 'Uova', quantita: '2 pezzi', prezzo_stimato_euro: 0.60 }, { prodotto: 'Zucchero', quantita: '80g', prezzo_stimato_euro: 0.99 }],
+    totale_stimato_euro: 4.09,
+    preparazione_step_by_step: ['Monta la panna ben ferma.', 'Sbatti i tuorli con lo zucchero e il succo di limone.', 'Monta gli albumi a neve.', 'Incorpora delicatamente panna e albumi al composto di limone.', 'Versa in coppette e lascia riposare in frigo un\'ora.'] },
+
+  { nome: 'Tagliere di salumi e formaggi', nome_ricerca: 'Tagliere salumi e formaggi', descrizione_breve: 'Aperitivo classico pronto in pochi minuti.', tempo_preparazione_minuti: 10, difficolta: 'Facile', emoji: '🧀', tags: ['lattosio'], pasti: ['aperitivo'],
+    lista_spesa: [{ prodotto: 'Salumi misti', quantita: '200g', prezzo_stimato_euro: 3.50 }, { prodotto: 'Formaggi misti', quantita: '200g', prezzo_stimato_euro: 3.20 }, { prodotto: 'Grissini', quantita: '1 confezione', prezzo_stimato_euro: 1.20 }],
+    totale_stimato_euro: 7.90,
+    preparazione_step_by_step: ['Taglia salumi e formaggi a fette o cubetti.', 'Disponili su un tagliere.', 'Aggiungi i grissini a lato.', 'Servi subito con delle bevande.'] },
+
+  { nome: 'Bruschette miste da aperitivo', nome_ricerca: 'Bruschette miste', descrizione_breve: 'Piccole bruschette variegate per un aperitivo sfizioso.', tempo_preparazione_minuti: 20, difficolta: 'Facile', emoji: '🍅', tags: ['glutine'], pasti: ['aperitivo', 'antipasto'],
+    lista_spesa: [{ prodotto: 'Pane casereccio', quantita: '1 filone', prezzo_stimato_euro: 1.50 }, { prodotto: 'Pomodorini', quantita: '300g', prezzo_stimato_euro: 1.60 }, { prodotto: 'Olive tapenade', quantita: '1 vasetto', prezzo_stimato_euro: 2.20 }, { prodotto: 'Basilico', quantita: '1 mazzetto', prezzo_stimato_euro: 1.00 }],
+    totale_stimato_euro: 6.30,
+    preparazione_step_by_step: ['Taglia il pane a fette e tostalo.', 'Prepara la farcitura di pomodorini a cubetti con basilico.', 'Spalma metà pane con la tapenade di olive.', 'Distribuisci i pomodorini sull\'altra metà.', 'Disponi su un vassoio e servi.'] },
+
+  { nome: 'Olive e taralli', nome_ricerca: 'Olive e taralli pugliesi', descrizione_breve: 'Aperitivo semplicissimo, pronto in un minuto.', tempo_preparazione_minuti: 3, difficolta: 'Facile', emoji: '🫒', tags: ['vegano', 'glutine'], pasti: ['aperitivo'],
+    lista_spesa: [{ prodotto: 'Olive miste', quantita: '250g', prezzo_stimato_euro: 2.20 }, { prodotto: 'Taralli', quantita: '1 confezione', prezzo_stimato_euro: 1.99 }],
+    totale_stimato_euro: 4.19,
+    preparazione_step_by_step: ['Metti le olive in una ciotolina.', 'Disponi i taralli in un cestino.', 'Servi insieme a bevande fresche.'] },
+
+  { nome: 'Patatine e salse miste', nome_ricerca: 'Patatine e salse aperitivo', descrizione_breve: 'Aperitivo pratico e sempre gradito.', tempo_preparazione_minuti: 5, difficolta: 'Facile', emoji: '🥔', tags: ['vegano', 'senza_glutine'], pasti: ['aperitivo'],
+    lista_spesa: [{ prodotto: 'Patatine in sacchetto', quantita: '1 confezione', prezzo_stimato_euro: 1.79 }, { prodotto: 'Salsa maionese', quantita: '1 vasetto', prezzo_stimato_euro: 1.50 }, { prodotto: 'Salsa ketchup', quantita: '1 vasetto', prezzo_stimato_euro: 1.50 }],
+    totale_stimato_euro: 4.79,
+    preparazione_step_by_step: ['Versa le patatine in una ciotola.', 'Metti le salse in ciotoline separate.', 'Servi subito.'] },
+
+  { nome: 'Tagliere di verdure grigliate', nome_ricerca: 'Verdure grigliate', descrizione_breve: 'Antipasto leggero e colorato, completamente vegano.', tempo_preparazione_minuti: 25, difficolta: 'Facile', emoji: '🍆', tags: ['vegano', 'senza_glutine'], pasti: ['antipasto', 'aperitivo'],
+    lista_spesa: [{ prodotto: 'Zucchine', quantita: '2 pezzi', prezzo_stimato_euro: 1.40 }, { prodotto: 'Melanzane', quantita: '2 pezzi', prezzo_stimato_euro: 1.60 }, { prodotto: 'Peperoni', quantita: '2 pezzi', prezzo_stimato_euro: 2.00 }, { prodotto: 'Olio EVO', quantita: 'q.b.', prezzo_stimato_euro: 0.40 }],
+    totale_stimato_euro: 5.40,
+    preparazione_step_by_step: ['Taglia le verdure a fette.', 'Grigliale su una piastra calda.', 'Condisci con olio, sale e un filo di aceto.', 'Disponi su un piatto da portata.', 'Servi tiepide o fredde.'] },
+
+  { nome: 'Spiedini caprese', nome_ricerca: 'Spiedini caprese', descrizione_breve: 'Antipasto fresco e colorato, facile da preparare.', tempo_preparazione_minuti: 15, difficolta: 'Facile', emoji: '🍅', tags: ['lattosio'], pasti: ['antipasto', 'aperitivo'],
+    lista_spesa: [{ prodotto: 'Pomodorini', quantita: '300g', prezzo_stimato_euro: 1.60 }, { prodotto: 'Mozzarelline', quantita: '250g', prezzo_stimato_euro: 2.20 }, { prodotto: 'Basilico', quantita: '1 mazzetto', prezzo_stimato_euro: 1.00 }],
+    totale_stimato_euro: 4.80,
+    preparazione_step_by_step: ['Infilza su stuzzicadenti pomodorino, basilico e mozzarellina.', 'Ripeti fino a esaurire gli ingredienti.', 'Disponi su un vassoio.', 'Condisci con un filo di olio e servi.'] },
+
+  { nome: 'Involtini di zucchine grigliate', nome_ricerca: 'Involtini di zucchine', descrizione_breve: 'Antipasto vegetale leggero e sfizioso.', tempo_preparazione_minuti: 25, difficolta: 'Media', emoji: '🥒', tags: ['vegano', 'senza_glutine'], pasti: ['antipasto'],
+    lista_spesa: [{ prodotto: 'Zucchine', quantita: '3 pezzi', prezzo_stimato_euro: 2.10 }, { prodotto: 'Menta fresca', quantita: '1 mazzetto', prezzo_stimato_euro: 1.00 }, { prodotto: 'Aglio', quantita: '1 testa', prezzo_stimato_euro: 0.40 }, { prodotto: 'Olio EVO', quantita: 'q.b.', prezzo_stimato_euro: 0.40 }],
+    totale_stimato_euro: 3.90,
+    preparazione_step_by_step: ['Taglia le zucchine a fette sottili nel senso della lunghezza.', 'Grigliale su una piastra calda.', 'Condisci con olio, aglio tritato e menta.', 'Arrotola ogni fetta su se stessa.', 'Servi a temperatura ambiente.'] }
 ];
 
 
@@ -294,7 +399,10 @@ function normalizzaTesto(value) {
 function ricettaCompatibileFallback(ricetta, body) {
   const intolleranze = normalizzaTesto(body.intolleranze);
   const tags = ricetta.tags || [];
+  const pastiRicetta = ricetta.pasti || ['pranzo', 'cena'];
+  const pastoRichiesto = normalizzaTesto(body.pasto);
 
+  if (pastoRichiesto && !pastiRicetta.includes(pastoRichiesto)) return false;
   if (body.vegano && !tags.includes('vegano')) return false;
   if (intolleranze.includes('lattosio') && tags.includes('lattosio')) return false;
   if (intolleranze.includes('glutine') && tags.includes('glutine')) return false;
@@ -307,6 +415,16 @@ function ricettaCompatibileFallback(ricetta, body) {
   return true;
 }
 
+const PASTO_LABEL_FALLBACK = {
+  colazione: 'la tua colazione',
+  pranzo: 'il tuo pranzo',
+  antipasto: 'il tuo antipasto',
+  aperitivo: 'il tuo aperitivo',
+  cena: 'la tua cena',
+  merenda: 'la tua merenda',
+  dolce: 'il tuo dolce'
+};
+
 function buildFallbackResponse(body) {
   const evitare = Array.isArray(body.ricette_da_evitare)
     ? body.ricette_da_evitare.map(normalizzaTesto)
@@ -316,11 +434,13 @@ function buildFallbackResponse(body) {
     .filter(r => !evitare.includes(normalizzaTesto(r.nome)))
     .filter(r => ricettaCompatibileFallback(r, body))
     .slice(0, 3)
-    .map(({ tags, ...ricetta }) => ricetta);
+    .map(({ tags, pasti, ...ricetta }) => ricetta);
+
+  const etichettaPasto = PASTO_LABEL_FALLBACK[body.pasto?.toLowerCase()] || 'la tua spesa';
 
   return {
     ricette,
-    note: 'Ricette base mostrate perché il servizio è momentaneamente occupato. Prezzi stimati, controllare eventuali offerte.'
+    note: `Ecco alcune idee per ${etichettaPasto}, mostrate perché il servizio è momentaneamente occupato. Prezzi stimati, controllare eventuali offerte.`
   };
 }
 
@@ -334,9 +454,27 @@ const SUPERMARKET_PROFILES = {
   carrefour: 'ipermercato generalista, marchio Carrefour, ampia scelta internazionale'
 };
 
-function buildPrompt({ persone, pasto, preferenze, intolleranze, vegano, supermercato, ricette_da_evitare }) {
- 
+const PASTO_DESCRIZIONI = {
+  colazione: 'colazione (proponi solo piatti da colazione italiana o internazionale: dolci da forno, yogurt, cereali, toast; non piatti da pranzo/cena)',
+  pranzo: 'pranzo (piatto completo, primo o secondo con contorno)',
+  antipasto: 'antipasto (porzioni piccole da condividere prima del pasto principale, non un piatto unico abbondante)',
+  aperitivo: 'aperitivo (stuzzichini, finger food, taglieri, piccole porzioni da accompagnare a una bevanda)',
+  cena: 'cena (piatto completo, primo o secondo con contorno)',
+  merenda: 'merenda (spuntino dolce o salato leggero, porzione singola)',
+  dolce: 'dolce (dessert, dolce da forno o al cucchiaio, non un piatto salato)'
+};
+
+const PICCANTEZZA_DESCRIZIONI = {
+  nessuna: 'nessuna richiesta particolare di piccantezza',
+  media: 'leggermente piccante, con un tocco di peperoncino o spezie',
+  alta: 'molto piccante, marcatamente speziato'
+};
+
+function buildPrompt({ persone, pasto, preferenze, intolleranze, vegano, supermercato, ricette_da_evitare, piccantezza }) {
+
   const profilo = SUPERMARKET_PROFILES[supermercato?.toLowerCase()] || 'supermercato generico italiano';
+  const descrizionePasto = PASTO_DESCRIZIONI[pasto?.toLowerCase()] || pasto;
+  const descrizionePiccantezza = PICCANTEZZA_DESCRIZIONI[piccantezza?.toLowerCase()] || PICCANTEZZA_DESCRIZIONI.nessuna;
   const ricetteDaEvitare = Array.isArray(ricette_da_evitare)
   ? ricette_da_evitare.filter(Boolean).join(', ')
   : '';
@@ -344,8 +482,8 @@ function buildPrompt({ persone, pasto, preferenze, intolleranze, vegano, superme
 
 DATI:
 - Numero di persone: ${persone}
-- Pasto: ${pasto}
-
+- Tipo di pasto: ${descrizionePasto}
+- Livello di piccantezza desiderato: ${descrizionePiccantezza}
 - Supermercato: ${supermercato} (${profilo})
 - Preferenze alimentari: ${preferenze || 'nessuna preferenza particolare'}
 - Vegano: ${vegano ? 'si' : 'no'}
@@ -365,7 +503,9 @@ ISTRUZIONI:
 10. Ogni ricetta deve avere una preparazione_step_by_step con 4-6 passaggi chiari, pratici e specifici per quella ricetta.
 11. Mantieni ogni descrizione breve e ogni lista_spesa essenziale, massimo 6 prodotti per ricetta.
 12. Se sono indicate ricette già proposte da evitare, non riproporle.
-13. Rispondi SOLO in JSON valido, senza testo fuori dal JSON. Non inserire virgole finali dopo l'ultimo elemento di array o oggetti.
+13. Rispetta rigorosamente il tipo di pasto indicato: non proporre piatti salati da pranzo/cena se è richiesta colazione, merenda o dolce, e viceversa.
+14. Se è richiesto un livello di piccantezza, adattalo negli ingredienti (es. peperoncino, spezie piccanti) mantenendo la ricetta coerente con il tipo di pasto.
+15. Rispondi SOLO in JSON valido, senza testo fuori dal JSON. Non inserire virgole finali dopo l'ultimo elemento di array o oggetti.
 
 Formato richiesto. Dentro "ricette" devi generare esattamente 6 oggetti come questo esempio:
 {
@@ -606,7 +746,8 @@ function chiaveCache(body) {
     supermercato: body.supermercato,
     preferenze: body.preferenze,
     vegano: body.vegano,
-    intolleranze: body.intolleranze
+    intolleranze: body.intolleranze,
+    piccantezza: body.piccantezza
   });
 }
 
