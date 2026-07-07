@@ -384,3 +384,143 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Int
   width: 150px;
   height: 150px;
 }
+
+.preparazione-box {
+  margin-top: 28px;
+}
+
+.preparazione-lista {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  display: grid;
+  gap: 12px;
+}
+
+.preparazione-lista li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(36, 124, 105, 0.08);
+}
+
+.step-number {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #247c69;
+  color: white;
+  font-weight: 700;
+  flex: 0 0 30px;
+}
+
+.preparazione-lista p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+
+.recipe-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.recipe-pagination button {
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 999px;
+  background: #247c69;
+  color: white;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.recipe-pagination button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.recipe-pagination span {
+  font-weight: 700;
+  color: #247c69;
+}
+
+.recipe-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.difficulty {
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.difficulty-facile {
+  background: rgba(36, 124, 105, 0.12);
+  color: #247c69;
+}
+
+.difficulty-media {
+  background: rgba(230, 150, 40, 0.16);
+  color: #a85f00;
+}
+
+.difficulty-difficile {
+  background: rgba(220, 70, 55, 0.14);
+  color: #b43626;
+}
+
+.result-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 1rem;
+}
+
+.result-summary span {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  color: var(--sage);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.secondary-btn {
+  background: var(--card);
+  color: var(--sage);
+  border: 2px solid var(--sage);
+}
+
+.result-actions {
+  display: grid;
+  gap: 10px;
+  margin: 1.4rem 0 2rem;
+}
+
+.result-actions .submit-btn {
+  margin-top: 0;
+}
