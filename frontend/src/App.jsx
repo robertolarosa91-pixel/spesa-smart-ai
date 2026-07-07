@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { auth, googleProvider, db } from './firebase';
-import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+import { signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, setDoc, deleteDoc, getDocs, collection } from 'firebase/firestore';
 
 
@@ -57,6 +57,10 @@ const [ricetteSalvate, setRicetteSalvate] = useState([]);
 const [mostraSalvate, setMostraSalvate] = useState(false);
 
 useEffect(() => {
+  getRedirectResult(auth).catch((err) => {
+    console.error('Errore dopo redirect login:', err.message);
+  });
+
   const unsubscribe = onAuthStateChanged(auth, (user) => {
     setUtente(user);
   });
@@ -80,9 +84,10 @@ async function caricaRicetteSalvate() {
 
 async function accedi() {
   try {
-    await signInWithPopup(auth, googleProvider);
+    await signInWithRedirect(auth, googleProvider);
   } catch (err) {
     console.error('Errore login:', err.message);
+    alert('Errore login: ' + err.message);
   }
 }
 
