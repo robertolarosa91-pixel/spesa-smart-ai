@@ -1,4 +1,7 @@
 import { useEffect, useState } from 'react';
+import { auth, googleProvider, db } from './firebase';
+import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
+import { doc, setDoc, deleteDoc, getDocs, collection } from 'firebase/firestore';
 
 
 
@@ -49,6 +52,62 @@ export default function App() {
 const [loading, setLoading] = useState(false);
 const [errore, setErrore] = useState(null);
 const [ricettaSelezionata, setRicettaSelezionata] = useState(0);
+const [utente, setUtente] = useState(null);
+const [ricetteSalvate, setRicetteSalvate] = useState([]);
+const [mostraSalvate, setMostraSalvate] = useState(false);
+
+useEffect(() => {
+  const unsubscribe = onAuthStateChanged(auth, (user) => {
+    setUtente(user);
+  });
+  return () => unsubscribe();
+}, []);
+
+useEffect(() => {
+  if (!utente) {
+    setRicetteSalvate([]);
+    return;
+  }
+  caricaRicetteSalvate();
+}, [utente]);
+
+async function caricaRicetteSalvate() {
+  if (!utente) return;
+  const snapshot = await getDocs(collection(db, 'utenti', utente.uid, 'ricette_salvate'));
+  const ricette = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+  setRicetteSalvate(ricette);
+}
+
+async function accedi() {
+  try {
+    await signInWithPopup(auth, googleProvider);
+  } catch (err) {
+    console.error('Errore login:', err.message);
+  }
+}
+
+async function esci() {
+  await signOut(auth);
+  setMostraSalvate(false);
+}
+
+async function salvaRicetta(ricetta) {
+  if (!utente) return;
+  const idRicetta = ricetta.nome.toLowerCase().replace(/[^a-z0-9]/g, '_');
+  await setDoc(doc(db, 'utenti', utente.uid, 'ricette_salvate', idRicetta), ricetta);
+  await caricaRicetteSalvate();
+}
+
+async function rimuoviRicettaSalvata(idRicetta) {
+  if (!utente) return;
+  await deleteDoc(doc(db, 'utenti', utente.uid, 'ricette_salvate', idRicetta));
+  await caricaRicetteSalvate();
+}
+
+function ricettaGiaSalvata(ricetta) {
+  const idRicetta = ricetta.nome.toLowerCase().replace(/[^a-z0-9]/g, '_');
+  return ricetteSalvate.some(r => r.id === idRicetta);
+}
 const [paginaRicette, setPaginaRicette] = useState(0);
 const [prodottiAcquistati, setProdottiAcquistati] = useState({});
 
