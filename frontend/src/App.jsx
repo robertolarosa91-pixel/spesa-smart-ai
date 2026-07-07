@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { auth, googleProvider, db } from './firebase';
-import { signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from 'firebase/auth';
+import { signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from 'firebase/auth';
 import { doc, setDoc, deleteDoc, getDocs, collection } from 'firebase/firestore';
 
 
@@ -60,16 +60,20 @@ useEffect(() => {
   getRedirectResult(auth)
     .then((result) => {
       if (result?.user) {
-        console.log('Login riuscito:', result.user.email);
+        alert('Login riuscito: ' + result.user.email);
+      } else {
+        alert('getRedirectResult non ha trovato nessun risultato');
       }
     })
     .catch((err) => {
-      console.error('Errore dopo redirect login:', err.message);
-      alert('Errore login: ' + err.message);
+      alert('Errore dopo redirect: ' + err.code + ' - ' + err.message);
     });
 
   const unsubscribe = onAuthStateChanged(auth, (user) => {
     setUtente(user);
+    if (user) {
+      alert('onAuthStateChanged: utente rilevato - ' + user.email);
+    }
   });
   return () => unsubscribe();
 }, []);
@@ -91,6 +95,7 @@ async function caricaRicetteSalvate() {
 
 async function accedi() {
   try {
+    await setPersistence(auth, browserLocalPersistence);
     await signInWithRedirect(auth, googleProvider);
   } catch (err) {
     console.error('Errore login:', err.message);
