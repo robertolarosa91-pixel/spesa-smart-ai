@@ -57,9 +57,16 @@ const [ricetteSalvate, setRicetteSalvate] = useState([]);
 const [mostraSalvate, setMostraSalvate] = useState(false);
 
 useEffect(() => {
-  getRedirectResult(auth).catch((err) => {
-    console.error('Errore dopo redirect login:', err.message);
-  });
+  getRedirectResult(auth)
+    .then((result) => {
+      if (result?.user) {
+        console.log('Login riuscito:', result.user.email);
+      }
+    })
+    .catch((err) => {
+      console.error('Errore dopo redirect login:', err.message);
+      alert('Errore login: ' + err.message);
+    });
 
   const unsubscribe = onAuthStateChanged(auth, (user) => {
     setUtente(user);
