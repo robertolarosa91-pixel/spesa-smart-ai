@@ -14,6 +14,22 @@ const SUPERMERCATI = [
 
 const INTOLLERANZE_COMUNI = ['Glutine', 'Lattosio', 'Frutta a guscio', 'Uova', 'Pesce/crostacei', 'Soia'];
 
+const PASTI = [
+  { id: 'colazione', label: 'Colazione', emoji: '🌅' },
+  { id: 'pranzo', label: 'Pranzo', emoji: '☀️' },
+  { id: 'antipasto', label: 'Antipasto', emoji: '🍤' },
+  { id: 'aperitivo', label: 'Aperitivo', emoji: '🥂' },
+  { id: 'cena', label: 'Cena', emoji: '🌙' },
+  { id: 'merenda', label: 'Merenda', emoji: '🍪' },
+  { id: 'dolce', label: 'Dolce', emoji: '🍰' }
+];
+
+const LIVELLI_PICCANTEZZA = [
+  { id: 'nessuna', label: 'Delicato' },
+  { id: 'media', label: "Un po' piccante" },
+  { id: 'alta', label: 'Molto piccante' }
+];
+
 const API_URL = import.meta.env.VITE_API_URL || 'https://spesa-smart-ai-backend.onrender.com';
 
 const STEPS = ['Chi mangia', 'Negozio', 'Gusti', 'Riepilogo'];
@@ -21,13 +37,13 @@ const STEPS = ['Chi mangia', 'Negozio', 'Gusti', 'Riepilogo'];
 export default function App() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
-    
     persone: 2,
     pasto: 'cena',
     supermercato: 'lidl',
     preferenze: '',
     vegano: false,
-    intolleranze: []
+    intolleranze: [],
+    piccantezza: 'nessuna'
   });
   const [risultato, setRisultato] = useState(null);
 const [loading, setLoading] = useState(false);
@@ -177,11 +193,11 @@ const preparazioneAttiva =
   <h1>La tua spesa è pronta</h1>
 
   <div className="result-summary">
-    <span>{form.pasto === 'cena' ? 'Cena' : 'Pranzo'}</span>
+    <span>{PASTI.find(p => p.id === form.pasto)?.label}</span>
     <span>{form.persone} {form.persone === 1 ? 'persona' : 'persone'}</span>
     <span>{SUPERMERCATI.find(s => s.id === form.supermercato)?.label}</span>
-    
 
+    {form.piccantezza !== 'nessuna' && <span>{LIVELLI_PICCANTEZZA.find(l => l.id === form.piccantezza)?.label}</span>}
     {form.vegano && <span>Vegano</span>}
 
     {form.intolleranze.length > 0 && (
@@ -378,17 +394,17 @@ const preparazioneAttiva =
               <button type="button" onClick={() => setForm(f => ({ ...f, persone: Math.min(12, f.persone + 1) }))}>+</button>
             </div>
 
-            <div className="toggle-row">
-              <button
-                type="button"
-                className={`toggle-btn ${form.pasto === 'pranzo' ? 'toggle-active' : ''}`}
-                onClick={() => setForm(f => ({ ...f, pasto: 'pranzo' }))}
-              >☀️ Pranzo</button>
-              <button
-                type="button"
-                className={`toggle-btn ${form.pasto === 'cena' ? 'toggle-active' : ''}`}
-                onClick={() => setForm(f => ({ ...f, pasto: 'cena' }))}
-              >🌙 Cena</button>
+            <div className="chips">
+              {PASTI.map(p => (
+                <button
+                  type="button"
+                  key={p.id}
+                  className={`chip ${form.pasto === p.id ? 'chip-active' : ''}`}
+                  onClick={() => setForm(f => ({ ...f, pasto: p.id }))}
+                >
+                  {p.emoji} {p.label}
+                </button>
+              ))}
             </div>
           </div>
         )}
@@ -432,6 +448,20 @@ const preparazioneAttiva =
               🌱 {form.vegano ? 'Vegano attivo' : 'Attiva modalità vegana'}
             </button>
 
+            <label className="field-label">Livello di piccantezza</label>
+            <div className="chips">
+              {LIVELLI_PICCANTEZZA.map(l => (
+                <button
+                  type="button"
+                  key={l.id}
+                  className={`chip ${form.piccantezza === l.id ? 'chip-active' : ''}`}
+                  onClick={() => setForm(f => ({ ...f, piccantezza: l.id }))}
+                >
+                  {l.label}
+                </button>
+              ))}
+            </div>
+
             <label className="field-label">Intolleranze / allergie</label>
             <div className="chips">
               {INTOLLERANZE_COMUNI.map(item => (
@@ -456,9 +486,10 @@ const preparazioneAttiva =
               <div className="summary-row"><span>Persone</span><strong>{form.persone}</strong></div>
               <div className="summary-row">
   <span>Pasto</span>
-  <strong>{form.pasto === 'cena' ? 'Cena' : 'Pranzo'}</strong>
+  <strong>{PASTI.find(p => p.id === form.pasto)?.label}</strong>
 </div>
               <div className="summary-row"><span>Supermercato</span><strong>{SUPERMERCATI.find(s => s.id === form.supermercato)?.label}</strong></div>
+              {form.piccantezza !== 'nessuna' && <div className="summary-row"><span>Piccantezza</span><strong>{LIVELLI_PICCANTEZZA.find(l => l.id === form.piccantezza)?.label}</strong></div>}
               {form.vegano && <div className="summary-row"><span>Dieta</span><strong>Vegano</strong></div>}
               {form.intolleranze.length > 0 && <div className="summary-row"><span>Da evitare</span><strong>{form.intolleranze.join(', ')}</strong></div>}
               {form.preferenze && <div className="summary-row"><span>Gusti</span><strong>{form.preferenze}</strong></div>}
