@@ -432,6 +432,20 @@ const preparazioneAttiva =
 
   return (
     <div className="page">
+      <div className="auth-bar">
+        {utente ? (
+          <>
+            <span className="auth-user">Ciao, {utente.displayName?.split(' ')[0]}</span>
+            <button type="button" className="auth-btn" onClick={() => setMostraSalvate(m => !m)}>
+              ❤️ Salvate ({ricetteSalvate.length})
+            </button>
+            <button type="button" className="auth-btn auth-btn-secondary" onClick={esci}>Esci</button>
+          </>
+        ) : (
+          <button type="button" className="auth-btn" onClick={accedi}>Accedi con Google</button>
+        )}
+      </div>
+
       <div className="progress-track">
         {STEPS.map((label, i) => (
           <div key={label} className={`progress-dot ${i <= step ? 'active' : ''} ${i === step ? 'current' : ''}`}>
