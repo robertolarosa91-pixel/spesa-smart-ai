@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react';
 import { auth, googleProvider, db } from './firebase';
-import { signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence } from 'firebase/auth';
+import {
+  signInWithPopup,
+  signInWithRedirect,
+  signOut,
+  onAuthStateChanged,
+  setPersistence,
+  browserLocalPersistence
+} from 'firebase/auth';
 import { doc, setDoc, deleteDoc, getDocs, collection } from 'firebase/firestore';
 
 
@@ -57,24 +64,10 @@ const [ricetteSalvate, setRicetteSalvate] = useState([]);
 const [mostraSalvate, setMostraSalvate] = useState(false);
 
 useEffect(() => {
-  getRedirectResult(auth)
-    .then((result) => {
-      if (result?.user) {
-        alert('Login riuscito: ' + result.user.email);
-      } else {
-        alert('getRedirectResult non ha trovato nessun risultato');
-      }
-    })
-    .catch((err) => {
-      alert('Errore dopo redirect: ' + err.code + ' - ' + err.message);
-    });
-
   const unsubscribe = onAuthStateChanged(auth, (user) => {
     setUtente(user);
-    if (user) {
-      alert('onAuthStateChanged: utente rilevato - ' + user.email);
-    }
   });
+
   return () => unsubscribe();
 }, []);
 
@@ -95,11 +88,24 @@ async function caricaRicetteSalvate() {
 
 async function accedi() {
   try {
+    setErrore(null);
+
     await setPersistence(auth, browserLocalPersistence);
-    await signInWithRedirect(auth, googleProvider);
+
+    await signInWithPopup(auth, googleProvider);
   } catch (err) {
-    console.error('Errore login:', err.message);
-    alert('Errore login: ' + err.message);
+    console.error('Errore login Google:', err);
+
+    if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request') {
+      try {
+        await signInWithRedirect(auth, googleProvider);
+        return;
+      } catch (redirectErr) {
+        console.error('Errore redirect Google:', redirectErr);
+      }
+    }
+
+    setErrore('Accesso Google non riuscito. Riprova.');
   }
 }
 
