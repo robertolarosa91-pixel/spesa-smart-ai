@@ -317,44 +317,52 @@ function apriRicettaSalvata(ricetta) {
 }
 
 function renderAccountArea() {
+  const mostraTastoHome = mostraSalvate || risultato;
+
   return (
     <div className="auth-bar">
       {utente ? (
         <>
-          <span className="auth-user">
-            Ciao, {utente.displayName?.split(' ')[0]}
-          </span>
+          <div className="auth-user-row">
+            <span className="auth-user">
+              Ciao, {utente.displayName?.split(' ')[0]}
+            </span>
+          </div>
 
-          {mostraSalvate && (
+          <div className="auth-actions">
+            {mostraTastoHome && (
+              <button
+                type="button"
+                className="auth-btn auth-home-btn"
+                onClick={vaiHome}
+              >
+                🏠 Home
+              </button>
+            )}
+
             <button
               type="button"
-              className="auth-btn auth-home-btn"
-              onClick={vaiHome}
+              className={`auth-btn ${mostraSalvate ? 'auth-btn-active' : ''}`}
+              onClick={vaiSalvate}
             >
-              🏠 Home
+              ❤️ Salvate ({ricetteSalvate.length})
             </button>
-          )}
 
-          <button
-            type="button"
-            className={`auth-btn ${mostraSalvate ? 'auth-btn-active' : ''}`}
-            onClick={vaiSalvate}
-          >
-            ❤️ Salvate ({ricetteSalvate.length})
-          </button>
-
-          <button
-            type="button"
-            className="auth-btn auth-btn-secondary"
-            onClick={esci}
-          >
-            Esci
-          </button>
+            <button
+              type="button"
+              className="auth-btn auth-btn-secondary"
+              onClick={esci}
+            >
+              Esci
+            </button>
+          </div>
         </>
       ) : (
-        <button type="button" className="auth-btn" onClick={accedi}>
-          Accedi con Google
-        </button>
+        <div className="auth-actions">
+          <button type="button" className="auth-btn" onClick={accedi}>
+            Accedi con Google
+          </button>
+        </div>
       )}
     </div>
   );
