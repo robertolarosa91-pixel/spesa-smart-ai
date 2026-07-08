@@ -320,81 +320,62 @@ function renderAccountArea() {
   const mostraTastoHome = Boolean(mostraSalvate || risultato);
 
   return (
-    <div
-      className="auth-bar"
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '0.7rem',
-        marginBottom: '1.2rem',
-        alignItems: 'stretch'
-      }}
-    >
-      {utente ? (
-        <>
-          <div
-            className="auth-user-row"
-            style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center'
-            }}
-          >
-            <span className="auth-user">
-              Ciao, {utente.displayName?.split(' ')[0]}
-            </span>
-          </div>
+    <header className="app-header">
+      <div className="brand-card">
+        <div className="brand-icon">🛒</div>
 
-          <div
-            className="auth-actions"
-            style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.55rem'
-            }}
-          >
-            {mostraTastoHome && (
+        <div className="brand-text">
+          <strong>Spesa Smart AI</strong>
+          <span>Ricette, lista e idee in pochi secondi</span>
+        </div>
+      </div>
+
+      <div className="auth-panel">
+        {utente ? (
+          <>
+            <div className="auth-user-row">
+              <span className="auth-user">
+                Ciao, {utente.displayName?.split(' ')[0]}
+              </span>
+            </div>
+
+            <div className="auth-actions">
+              {mostraTastoHome && (
+                <button
+                  type="button"
+                  className="auth-btn auth-home-btn"
+                  onClick={vaiHome}
+                >
+                  🏠 Home
+                </button>
+              )}
+
               <button
                 type="button"
-                className="auth-btn auth-home-btn"
-                onClick={vaiHome}
+                className={`auth-btn ${mostraSalvate ? 'auth-btn-active' : ''}`}
+                onClick={vaiSalvate}
               >
-                🏠 Home
+                ❤️ Salvate ({ricetteSalvate.length})
               </button>
-            )}
 
-            <button
-              type="button"
-              className={`auth-btn ${mostraSalvate ? 'auth-btn-active' : ''}`}
-              onClick={vaiSalvate}
-            >
-              ❤️ Salvate ({ricetteSalvate.length})
-            </button>
-
-            <button
-              type="button"
-              className="auth-btn auth-btn-secondary"
-              onClick={esci}
-            >
-              Esci
+              <button
+                type="button"
+                className="auth-btn auth-btn-secondary"
+                onClick={esci}
+              >
+                Esci
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="auth-actions">
+            <button type="button" className="auth-btn" onClick={accedi}>
+              Accedi con Google
             </button>
           </div>
-        </>
-      ) : (
-        <div
-          className="auth-actions"
-          style={{
-            width: '100%',
-            display: 'flex'
-          }}
-        >
-          <button type="button" className="auth-btn" onClick={accedi}>
-            Accedi con Google
-          </button>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </header>
   );
 }
 const [paginaRicette, setPaginaRicette] = useState(0);
