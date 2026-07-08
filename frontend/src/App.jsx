@@ -317,19 +317,43 @@ function apriRicettaSalvata(ricetta) {
 }
 
 function renderAccountArea() {
-  const mostraTastoHome = mostraSalvate || risultato;
+  const mostraTastoHome = Boolean(mostraSalvate || risultato);
 
   return (
-    <div className="auth-bar">
+    <div
+      className="auth-bar"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.7rem',
+        marginBottom: '1.2rem',
+        alignItems: 'stretch'
+      }}
+    >
       {utente ? (
         <>
-          <div className="auth-user-row">
+          <div
+            className="auth-user-row"
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
             <span className="auth-user">
               Ciao, {utente.displayName?.split(' ')[0]}
             </span>
           </div>
 
-          <div className="auth-actions">
+          <div
+            className="auth-actions"
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.55rem'
+            }}
+          >
             {mostraTastoHome && (
               <button
                 type="button"
@@ -358,7 +382,13 @@ function renderAccountArea() {
           </div>
         </>
       ) : (
-        <div className="auth-actions">
+        <div
+          className="auth-actions"
+          style={{
+            width: '100%',
+            display: 'flex'
+          }}
+        >
           <button type="button" className="auth-btn" onClick={accedi}>
             Accedi con Google
           </button>
