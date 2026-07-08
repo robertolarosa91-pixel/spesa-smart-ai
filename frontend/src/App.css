@@ -716,3 +716,50 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Int
   border-bottom: 2px solid var(--ink);
   padding-bottom: 0.45rem;
 }
+
+
+.auth-bar {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 0.7rem !important;
+  margin-bottom: 1.2rem !important;
+}
+
+.auth-user-row {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.auth-user {
+  margin-right: 0 !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+}
+
+.auth-actions {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.55rem !important;
+}
+
+.auth-btn {
+  flex: 1 !important;
+  min-width: 0 !important;
+  padding: 0.55rem 0.55rem !important;
+  font-size: 0.82rem !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+}
+
+.auth-btn-secondary {
+  flex: 0.75 !important;
+}
+
+.auth-home-btn {
+  background: #ffffff !important;
+  color: var(--sage) !important;
+  border: 2px solid var(--sage) !important;
+}
