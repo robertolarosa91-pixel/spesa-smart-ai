@@ -2033,3 +2033,97 @@ body::after {
 .ad-card-compact .ad-ins {
   min-height: 280px !important;
 }
+
+
+/* ─────────────────────────────────────────────
+   PAGINA CRONOLOGIA
+───────────────────────────────────────────── */
+
+.auth-actions-secondary {
+  margin-top: 0.55rem;
+}
+
+.auth-history-btn {
+  width: 100%;
+}
+
+.history-page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.history-page-head h1 {
+  margin-bottom: 0.25rem;
+}
+
+.history-page-head p {
+  margin: 0;
+  color: #6b6558;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.clear-history-btn {
+  border: 2px solid var(--tomato);
+  background: #ffffff;
+  color: var(--tomato-dark);
+  border-radius: 999px;
+  padding: 0.55rem 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.history-page-list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.history-page-card {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.85rem;
+  border-radius: 22px;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  box-shadow: 0 8px 20px rgba(55, 38, 20, 0.05);
+}
+
+.history-open-card {
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.history-open-card strong {
+  display: block;
+  font-family: 'Fraunces', serif;
+  font-size: 1.15rem;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.history-open-card span {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--sage);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.history-delete-btn {
+  width: 100%;
+  border: 2px solid var(--tomato);
+  background: #fff7f3;
+  color: var(--tomato-dark);
+  border-radius: 16px;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 900;
+  cursor: pointer;
+}
