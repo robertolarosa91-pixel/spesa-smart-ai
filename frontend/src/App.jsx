@@ -53,7 +53,9 @@ export default function App() {
     preferenze: '',
     vegano: false,
     intolleranze: [],
-    piccantezza: 'nessuna'
+    piccantezza: 'nessuna',
+    budget: 25,
+    ingredientiCasa: ''
   });
   const [risultato, setRisultato] = useState(null);
 const [loading, setLoading] = useState(false);
@@ -62,6 +64,7 @@ const [ricettaSelezionata, setRicettaSelezionata] = useState(0);
 const [utente, setUtente] = useState(null);
 const [ricetteSalvate, setRicetteSalvate] = useState([]);
 const [mostraSalvate, setMostraSalvate] = useState(false);
+const [cronologia, setCronologia] = useState([]);
 
 useEffect(() => {
   const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -72,6 +75,8 @@ useEffect(() => {
 }, []);
 
 useEffect(() => {
+  setCronologia(caricaCronologiaLocale());
+
   if (!utente) {
     setRicetteSalvate([]);
     setMostraSalvate(false);
@@ -429,6 +434,195 @@ function renderLoadingOverlay() {
   );
 }
 
+function getHistoryKey() {
+  return utente ? `cronologia_spesa_${utente.uid}` : 'cronologia_spesa_ospite';
+}
+
+function caricaCronologiaLocale() {
+  try {
+    const raw = localStorage.getItem(getHistoryKey());
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function salvaCronologiaLocale(lista) {
+  try {
+    localStorage.setItem(getHistoryKey(), JSON.stringify(lista));
+  } catch (err) {
+    console.warn('Errore salvataggio cronologia:', err);
+  }
+}
+
+function salvaInCronologia(data) {
+  if (!data?.ricette?.length) return;
+
+  const item = {
+    id: String(Date.now()),
+    salvata_il: new Date().toISOString(),
+    titolo: data.ricette?.[0]?.nome || 'Spesa generata',
+    form: {
+      persone: form.persone,
+      pasto: form.pasto,
+      supermercato: form.supermercato,
+      budget: form.budget,
+      preferenze: form.preferenze,
+      ingredientiCasa: form.ingredientiCasa
+    },
+    risultato: data
+  };
+
+  const nuovaCronologia = [
+    item,
+    ...cronologia.filter(x => x.titolo !== item.titolo)
+  ].slice(0, 8);
+
+  setCronologia(nuovaCronologia);
+  salvaCronologiaLocale(nuovaCronologia);
+}
+
+function apriDaCronologia(item) {
+  if (item.form) {
+    setForm(f => ({
+      ...f,
+      ...item.form
+    }));
+  }
+
+  setRisultato(item.risultato);
+  setMostraSalvate(false);
+  setRicettaSelezionata(0);
+  setPaginaRicette(0);
+  setProdottiAcquistati({});
+  setErrore(null);
+}
+
+function repartoDaProdotto(prodotto) {
+  const t = String(prodotto || '').toLowerCase();
+
+  if (/pomodor|insalat|zucchin|carot|patat|cipoll|limon|basilic|broccol|peperon|melanzan|verdura|frutta|banana|mela|fragol|fungh/i.test(t)) {
+    return 'Frutta e verdura';
+  }
+
+  if (/pollo|manzo|hamburger|salsiccia|tonno|salmone|merluzzo|pesce|vongol|platessa|carne/i.test(t)) {
+    return 'Carne e pesce';
+  }
+
+  if (/latte|mozzarella|formaggio|uova|yogurt|burro|panna|parmigiano|pecorino|feta/i.test(t)) {
+    return 'Latticini e uova';
+  }
+
+  if (/pane|piadina|panini|toast|taralli|grissini|sfoglia|brisee/i.test(t)) {
+    return 'Panetteria';
+  }
+
+  if (/surgelat|piselli|spinaci/i.test(t)) {
+    return 'Surgelati';
+  }
+
+  if (/acqua|succo|bevanda/i.test(t)) {
+    return 'Bevande';
+  }
+
+  return 'Dispensa';
+}
+
+function repartoConIcona(reparto) {
+  const r = String(reparto || '').toLowerCase();
+
+  if (r.includes('frutta') || r.includes('verdura')) return '🥬 Frutta e verdura';
+  if (r.includes('carne') || r.includes('pesce')) return '🥩 Carne e pesce';
+  if (r.includes('latticini') || r.includes('uova')) return '🥚 Latticini e uova';
+  if (r.includes('panetteria') || r.includes('pane')) return '🥖 Panetteria';
+  if (r.includes('surgelati')) return '❄️ Surgelati';
+  if (r.includes('bevande')) return '🥤 Bevande';
+  if (r.includes('dispensa')) return '🧂 Dispensa';
+
+  return '🛒 Altro';
+}
+
+function raggruppaListaPerReparto(lista) {
+  return (lista || []).reduce((acc, prodotto, index) => {
+    const repartoBase = prodotto.reparto || repartoDaProdotto(prodotto.prodotto);
+    const reparto = repartoConIcona(repartoBase);
+
+    if (!acc[reparto]) acc[reparto] = [];
+
+    acc[reparto].push({
+      ...prodotto,
+      __index: index
+    });
+
+    return acc;
+  }, {});
+}
+
+function getRecipeBadges(ricetta) {
+  const badgesAI = Array.isArray(ricetta?.badge_qualita)
+    ? ricetta.badge_qualita
+    : [];
+
+  const badges = [...badgesAI];
+
+  const tempo = Number(ricetta?.tempo_preparazione_minuti || 0);
+  const totale = Number(ricetta?.totale_stimato_euro || 0);
+  const budget = Number(form.budget || 0);
+
+  if (tempo > 0 && tempo <= 20) badges.push('⚡ Veloce');
+
+  if (budget > 0 && totale > 0) {
+    const distanza = Math.abs(totale - budget) / budget;
+
+    if (distanza <= 0.25) {
+      badges.push('🎯 Budget centrato');
+    } else if (totale < budget * 0.75) {
+      badges.push('💸 Economica');
+    }
+  }
+
+  if (form.vegano) badges.push('🌱 Vegana');
+
+  if (form.piccantezza === 'media') badges.push('🌶️ Piccante');
+  if (form.piccantezza === 'alta') badges.push('🔥 Molto piccante');
+
+  return [...new Set(badges.filter(Boolean))].slice(0, 4);
+}
+
+function condividiWhatsApp(ricetta, lista, totale) {
+  if (!ricetta) return;
+
+  const reparti = raggruppaListaPerReparto(lista);
+
+  const listaTesto = Object.entries(reparti)
+    .map(([reparto, prodotti]) => {
+      const righe = prodotti
+        .map(p => {
+          const prezzo = Number(p.prezzo_stimato_euro || 0);
+          return `• ${p.prodotto} — ${p.quantita}${prezzo ? ` (€${prezzo.toFixed(2)})` : ''}`;
+        })
+        .join('\n');
+
+      return `${reparto}\n${righe}`;
+    })
+    .join('\n\n');
+
+  const testo = `🛒 Spesa Smart AI
+
+🍽️ Ricetta: ${ricetta.nome}
+👥 Persone: ${form.persone}
+🏪 Supermercato: ${SUPERMERCATI.find(s => s.id === form.supermercato)?.label}
+💶 Budget: €${Number(form.budget || 0).toFixed(0)}
+💰 Totale stimato: €${Number(totale || 0).toFixed(2)}
+
+LISTA DELLA SPESA:
+${listaTesto}
+
+Preparata con Spesa Smart AI ✨`;
+
+  window.open(`https://wa.me/?text=${encodeURIComponent(testo)}`, '_blank', 'noopener,noreferrer');
+}
+
 const [paginaRicette, setPaginaRicette] = useState(0);
 const [prodottiAcquistati, setProdottiAcquistati] = useState({});
 
@@ -531,6 +725,7 @@ async function generaAltreRicette() {
   throw new Error(data.details || data.error || 'Errore sconosciuto');
 }
 
+    salvaInCronologia(data);
     setRisultato(data);
   } catch (err) {
     setErrore(err.message);
@@ -652,6 +847,14 @@ const preparazioneAttiva =
         : 'Genera altre ricette'}
   </button>
 
+  <button
+    className="submit-btn whatsapp-btn"
+    onClick={() => condividiWhatsApp(ricettaAttiva, listaSpesaAttiva, totaleAttivo)}
+    disabled={!ricettaAttiva}
+  >
+    📲 Condividi su WhatsApp
+  </button>
+
   <button className="submit-btn secondary-btn" onClick={resetTutto}>
     Ricomincia
   </button>
@@ -696,6 +899,12 @@ const preparazioneAttiva =
         <div className="card-body">
           <h3>{r.nome}</h3>
           <p>{r.descrizione_breve}</p>
+
+          <div className="quality-badges">
+            {getRecipeBadges(r).map((badge) => (
+              <span key={badge}>{badge}</span>
+            ))}
+          </div>
 
           <div className="recipe-meta">
             <span className="tempo">⏱ {r.tempo_preparazione_minuti} min</span>
@@ -755,42 +964,51 @@ const preparazioneAttiva =
 
           <section>
             <h2>Lista della spesa {ricettaAttiva?.nome ? `— ${ricettaAttiva.nome}` : ''}</h2>
-            <ul className="lista-spesa">
-              {listaSpesaAttiva?.map((p, i) => {
-  const acquistato = !!prodottiAcquistati[i];
-  const prezzo = Number(p.prezzo_stimato_euro || 0);
+            <div className="lista-reparti">
+              {Object.entries(raggruppaListaPerReparto(listaSpesaAttiva)).map(([reparto, prodotti]) => (
+                <div key={reparto} className="reparto-group fade-in">
+                  <h3 className="reparto-title">{reparto}</h3>
 
-  return (
-    <li
-      key={i}
-      className="fade-in"
-      onClick={() => toggleProdottoAcquistato(i)}
-      style={{
-        animationDelay: `${i * 0.05}s`,
-        cursor: 'pointer',
-        opacity: acquistato ? 0.45 : 1
-      }}
-    >
-      <span
-        style={{
-          textDecoration: acquistato ? 'line-through' : 'none'
-        }}
-      >
-        {p.prodotto} — {p.quantita}
-      </span>
+                  <ul className="lista-spesa">
+                    {prodotti.map((p) => {
+                      const i = p.__index;
+                      const acquistato = !!prodottiAcquistati[i];
+                      const prezzo = Number(p.prezzo_stimato_euro || 0);
 
-      <span
-        className="prezzo"
-        style={{
-          textDecoration: acquistato ? 'line-through' : 'none'
-        }}
-      >
-        €{prezzo.toFixed(2)}
-      </span>
-    </li>
-  );
-})}
-            </ul>
+                      return (
+                        <li
+                          key={i}
+                          className="fade-in"
+                          onClick={() => toggleProdottoAcquistato(i)}
+                          style={{
+                            animationDelay: `${i * 0.05}s`,
+                            cursor: 'pointer',
+                            opacity: acquistato ? 0.45 : 1
+                          }}
+                        >
+                          <span
+                            style={{
+                              textDecoration: acquistato ? 'line-through' : 'none'
+                            }}
+                          >
+                            {p.prodotto} — {p.quantita}
+                          </span>
+
+                          <span
+                            className="prezzo"
+                            style={{
+                              textDecoration: acquistato ? 'line-through' : 'none'
+                            }}
+                          >
+                            €{prezzo.toFixed(2)}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </div>
             <div className="totale">
   Totale stimato <strong>€{totaleAttivo?.toFixed(2)}</strong>
   <span className="totale-budget"> stimati</span>
@@ -840,6 +1058,32 @@ const preparazioneAttiva =
         {step === 0 && (
           <div className="step-body">
             <h1 className="step-title">Per chi cuciniamo?</h1>
+
+            <div className="budget-smart-card">
+              <div>
+                <span className="budget-label">Budget indicativo</span>
+                <strong>€{Number(form.budget || 0).toFixed(0)}</strong>
+              </div>
+
+              <div className="budget-controls">
+                <button
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, budget: Math.max(5, Number(f.budget || 0) - 5) }))}
+                >
+                  −
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, budget: Math.min(200, Number(f.budget || 0) + 5) }))}
+                >
+                  +
+                </button>
+              </div>
+
+              <p>Lo userò come obiettivo: se metti €100, cercherò ricette più vicine a quel valore, non da €10.</p>
+            </div>
+
             <div className="stepper">
               <button type="button" onClick={() => setForm(f => ({ ...f, persone: Math.max(1, f.persone - 1) }))}>−</button>
               <span className="stepper-value">{form.persone} {form.persone === 1 ? 'persona' : 'persone'}</span>
@@ -890,6 +1134,14 @@ const preparazioneAttiva =
               value={form.preferenze}
               onChange={e => setForm(f => ({ ...f, preferenze: e.target.value }))}
               className="text-input"
+            />
+
+            <label className="field-label">Ho già in casa</label>
+            <textarea
+              placeholder="Es: pasta, uova, tonno, zucchine, riso..."
+              value={form.ingredientiCasa}
+              onChange={e => setForm(f => ({ ...f, ingredientiCasa: e.target.value }))}
+              className="text-input pantry-input"
             />
 
             <button
@@ -954,6 +1206,31 @@ const preparazioneAttiva =
           </div>
         )}
       </div>
+
+      {step === 0 && cronologia.length > 0 && (
+        <div className="history-panel fade-in">
+          <div className="history-header">
+            <h2>Cronologia</h2>
+            <span>Ultime spese generate</span>
+          </div>
+
+          <div className="history-list">
+            {cronologia.slice(0, 4).map((item) => (
+              <button
+                type="button"
+                key={item.id}
+                className="history-card"
+                onClick={() => apriDaCronologia(item)}
+              >
+                <strong>{item.titolo}</strong>
+                <span>
+                  €{Number(item.form?.budget || 0).toFixed(0)} · {PASTI.find(p => p.id === item.form?.pasto)?.label || 'Pasto'}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="nav-bar">
         {step > 0 && <button className="nav-btn nav-back" onClick={back}>Indietro</button>}
