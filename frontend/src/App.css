@@ -16,28 +16,47 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Int
 
 .auth-bar {
   display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-bottom: 1.2rem;
+}
+
+.auth-user-row {
+  display: flex;
   align-items: center;
-  gap: 0.6rem;
-  margin-bottom: 1rem;
-  flex-wrap: wrap;
+  width: 100%;
 }
+
 .auth-user {
-  font-size: 0.85rem;
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 700;
   color: #52493c;
-  margin-right: auto;
 }
+
+.auth-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+}
+
 .auth-btn {
-  padding: 0.5rem 0.9rem;
+  flex: 1;
+  min-width: 0;
+  padding: 0.55rem 0.55rem;
   border-radius: 999px;
   border: 2px solid var(--sage);
   background: var(--sage);
   color: white;
-  font-size: 0.8rem;
-  font-weight: 700;
+  font-size: 0.82rem;
+  font-weight: 800;
   cursor: pointer;
+  white-space: nowrap;
+  text-align: center;
 }
+
 .auth-btn-secondary {
+  flex: 0.75;
   background: white;
   color: var(--sage);
 }
