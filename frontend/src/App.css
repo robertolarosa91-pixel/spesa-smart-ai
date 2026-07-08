@@ -1588,3 +1588,180 @@ body::after {
     transform: translateX(240%);
   }
 }
+
+
+/* ─────────────────────────────────────────────
+   BUDGET SMART
+───────────────────────────────────────────── */
+
+.budget-smart-card {
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 1rem;
+  box-shadow: 0 10px 24px rgba(55, 38, 20, 0.07);
+}
+
+.budget-smart-card > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.budget-label {
+  color: var(--sage);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.budget-smart-card strong {
+  font-family: 'Fraunces', serif;
+  font-size: 2.2rem;
+}
+
+.budget-controls {
+  display: flex;
+  gap: 0.7rem;
+  margin: 0.9rem 0;
+}
+
+.budget-controls button {
+  flex: 1;
+  height: 48px;
+  border: none;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--sage), var(--sage-dark));
+  color: white;
+  font-size: 1.4rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.budget-smart-card p {
+  margin: 0;
+  color: #6b6558;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  font-weight: 600;
+}
+
+.pantry-input {
+  min-height: 88px;
+  resize: vertical;
+}
+
+/* ─────────────────────────────────────────────
+   BADGE QUALITÀ
+───────────────────────────────────────────── */
+
+.quality-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.38rem;
+  margin: 0.55rem 0;
+}
+
+.quality-badges span {
+  padding: 0.35rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(8, 123, 99, 0.10);
+  color: var(--sage);
+  font-size: 0.68rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+/* ─────────────────────────────────────────────
+   LISTA PER REPARTO
+───────────────────────────────────────────── */
+
+.lista-reparti {
+  display: grid;
+  gap: 1rem;
+}
+
+.reparto-group {
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 0.8rem;
+  box-shadow: 0 8px 20px rgba(55, 38, 20, 0.05);
+}
+
+.reparto-title {
+  margin: 0 0 0.6rem;
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: var(--sage);
+}
+
+/* ─────────────────────────────────────────────
+   WHATSAPP
+───────────────────────────────────────────── */
+
+.whatsapp-btn {
+  background: linear-gradient(135deg, #18a558, #087b63) !important;
+}
+
+/* ─────────────────────────────────────────────
+   CRONOLOGIA
+───────────────────────────────────────────── */
+
+.history-panel {
+  margin: 1.2rem 0 5.5rem;
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  padding: 1rem;
+  box-shadow: 0 12px 28px rgba(55, 38, 20, 0.08);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.history-header {
+  margin-bottom: 0.8rem;
+}
+
+.history-header h2 {
+  font-family: 'Fraunces', serif;
+  margin: 0;
+  font-size: 1.45rem;
+}
+
+.history-header span {
+  color: #6b6558;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.history-list {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.history-card {
+  text-align: left;
+  border: 1px solid var(--line);
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 0.8rem;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(55, 38, 20, 0.05);
+}
+
+.history-card strong {
+  display: block;
+  font-family: 'Fraunces', serif;
+  font-size: 1rem;
+  color: var(--ink);
+}
+
+.history-card span {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--sage);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
