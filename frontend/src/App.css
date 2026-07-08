@@ -763,3 +763,387 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Int
   color: var(--sage) !important;
   border: 2px solid var(--sage) !important;
 }
+
+
+/* ─────────────────────────────────────────────
+   RESTYLE SPESA SMART AI
+───────────────────────────────────────────── */
+
+:root {
+  --paper: #FFF8ED;
+  --ink: #1F1A16;
+  --tomato: #F15A3B;
+  --tomato-dark: #B93B25;
+  --sage: #087B63;
+  --sage-dark: #045C49;
+  --sage-light: #E4F5EE;
+  --mint: #CFF5E6;
+  --cream: #FFFDF8;
+  --line: #EADCC8;
+  --card: #FFFFFF;
+  --shadow-soft: 0 16px 40px rgba(55, 38, 20, 0.08);
+  --shadow-small: 0 8px 22px rgba(55, 38, 20, 0.06);
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(8, 123, 99, 0.13), transparent 32%),
+    radial-gradient(circle at top right, rgba(241, 90, 59, 0.12), transparent 30%),
+    linear-gradient(180deg, #FFF7EB 0%, #FFFDF8 42%, #FFF8ED 100%) !important;
+  color: var(--ink);
+}
+
+.page {
+  max-width: 500px !important;
+  padding: 1.15rem 1.15rem 6.8rem !important;
+}
+
+/* Header brand */
+.app-header {
+  display: grid;
+  gap: 0.85rem;
+  margin-bottom: 1.2rem;
+}
+
+.brand-card {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.95rem;
+  border-radius: 24px;
+  background:
+    linear-gradient(135deg, rgba(8, 123, 99, 0.96), rgba(5, 92, 73, 0.98));
+  color: #ffffff;
+  box-shadow: 0 18px 38px rgba(8, 123, 99, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+}
+
+.brand-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.65rem;
+  flex: 0 0 52px;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.16rem;
+}
+
+.brand-text strong {
+  font-family: 'Fraunces', serif;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.brand-text span {
+  font-size: 0.78rem;
+  opacity: 0.88;
+  font-weight: 600;
+}
+
+/* Account */
+.auth-panel {
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(234, 220, 200, 0.95);
+  border-radius: 22px;
+  padding: 0.8rem;
+  box-shadow: var(--shadow-small);
+  backdrop-filter: blur(12px);
+}
+
+.auth-user-row {
+  width: 100% !important;
+  margin-bottom: 0.65rem;
+}
+
+.auth-user {
+  font-size: 0.95rem !important;
+  font-weight: 800 !important;
+  color: #4E4438 !important;
+}
+
+.auth-actions {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.5rem !important;
+}
+
+.auth-btn {
+  flex: 1 !important;
+  min-width: 0 !important;
+  border-radius: 999px !important;
+  padding: 0.62rem 0.5rem !important;
+  font-size: 0.82rem !important;
+  font-weight: 900 !important;
+  border: 2px solid var(--sage) !important;
+  background: var(--sage) !important;
+  color: #ffffff !important;
+  white-space: nowrap !important;
+  box-shadow: 0 8px 16px rgba(8, 123, 99, 0.16);
+}
+
+.auth-btn-secondary,
+.auth-home-btn {
+  background: #ffffff !important;
+  color: var(--sage) !important;
+  box-shadow: none !important;
+}
+
+.auth-btn-active {
+  background: var(--sage-dark) !important;
+  border-color: var(--sage-dark) !important;
+}
+
+/* Step progress più carina */
+.progress-track {
+  gap: 0.55rem !important;
+  margin: 1.15rem 0 0.65rem !important;
+}
+
+.progress-dot {
+  height: 8px !important;
+  background: rgba(234, 220, 200, 0.9) !important;
+}
+
+.progress-dot.active {
+  background: linear-gradient(90deg, var(--tomato), #FF8A4D) !important;
+}
+
+.step-label {
+  color: var(--sage) !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.06em !important;
+}
+
+.step-title {
+  font-size: 2.35rem !important;
+  letter-spacing: -0.04em;
+}
+
+/* Card contenuto */
+.step-content {
+  background: rgba(255, 255, 255, 0.58);
+  border: 1px solid rgba(234, 220, 200, 0.86);
+  border-radius: 28px;
+  padding: 1.05rem;
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(10px);
+}
+
+/* Stepper persone */
+.stepper {
+  border-radius: 24px !important;
+  border: 1px solid rgba(234, 220, 200, 0.95) !important;
+  box-shadow: var(--shadow-small);
+  padding: 1.15rem !important;
+}
+
+.stepper button {
+  width: 54px !important;
+  height: 54px !important;
+  background: linear-gradient(135deg, var(--sage), var(--sage-dark)) !important;
+  box-shadow: 0 10px 22px rgba(8, 123, 99, 0.24);
+}
+
+.stepper-value {
+  font-size: 1.25rem !important;
+}
+
+/* Chips più morbide */
+.chips {
+  gap: 0.65rem !important;
+}
+
+.chip {
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: 0 6px 14px rgba(55, 38, 20, 0.05);
+  padding: 0.65rem 0.95rem !important;
+}
+
+.chip-active {
+  background: linear-gradient(135deg, var(--tomato), #FF7A4B) !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 20px rgba(241, 90, 59, 0.24);
+}
+
+/* Supermercati */
+.market-grid {
+  gap: 0.9rem !important;
+}
+
+.market-card {
+  border-radius: 22px !important;
+  padding: 1.05rem !important;
+  background: rgba(255, 255, 255, 0.92) !important;
+  box-shadow: var(--shadow-small);
+}
+
+.market-active {
+  border-color: var(--sage) !important;
+  background: linear-gradient(135deg, #E6F8F0, #FFFFFF) !important;
+}
+
+/* Input */
+.text-input {
+  border-radius: 18px !important;
+  background: #ffffff !important;
+  padding: 0.95rem !important;
+  box-shadow: var(--shadow-small);
+}
+
+.vegano-btn {
+  border-radius: 20px !important;
+  background: #ffffff !important;
+  box-shadow: var(--shadow-small);
+}
+
+.vegano-active {
+  background: linear-gradient(135deg, #E4F5EE, #FFFFFF) !important;
+}
+
+/* Bottoni bottom */
+.nav-bar {
+  background: linear-gradient(to top, rgba(255, 248, 237, 1) 70%, rgba(255, 248, 237, 0)) !important;
+}
+
+.nav-btn {
+  border-radius: 20px !important;
+  padding: 1.05rem !important;
+  box-shadow: 0 12px 24px rgba(241, 90, 59, 0.20);
+}
+
+.nav-next {
+  background: linear-gradient(135deg, var(--tomato), #FF7A4B) !important;
+}
+
+.nav-back {
+  box-shadow: none !important;
+}
+
+/* Risultati */
+.result-hero {
+  background:
+    linear-gradient(135deg, rgba(8, 123, 99, 0.10), rgba(241, 90, 59, 0.08)),
+    #ffffff;
+  border-radius: 30px;
+  padding: 1.15rem;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-soft);
+}
+
+.eyebrow {
+  color: var(--sage) !important;
+  font-weight: 900 !important;
+}
+
+.result-hero h1 {
+  font-size: 2.55rem !important;
+  letter-spacing: -0.05em;
+}
+
+.result-summary span {
+  border-radius: 999px !important;
+  background: #ffffff !important;
+  box-shadow: 0 6px 14px rgba(55, 38, 20, 0.05);
+}
+
+/* Azioni risultato */
+.submit-btn {
+  border-radius: 22px !important;
+  background: linear-gradient(135deg, var(--sage), var(--sage-dark)) !important;
+  box-shadow: 0 12px 26px rgba(8, 123, 99, 0.22);
+}
+
+.secondary-btn {
+  background: #ffffff !important;
+  color: var(--sage) !important;
+  border: 2px solid var(--sage) !important;
+  box-shadow: none !important;
+}
+
+/* Card ricette */
+.card {
+  border-radius: 26px !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  border: 1px solid rgba(234, 220, 200, 0.96) !important;
+  box-shadow: var(--shadow-soft);
+}
+
+.recipe-card {
+  overflow: hidden;
+}
+
+.recipe-card .card-body h3 {
+  font-size: 1.55rem !important;
+  letter-spacing: -0.04em;
+}
+
+.card-image,
+.recipe-card .card-emoji {
+  border-radius: 22px !important;
+}
+
+.difficulty {
+  font-weight: 900 !important;
+}
+
+.save-recipe-btn {
+  border-radius: 22px !important;
+  background: #ffffff !important;
+  box-shadow: var(--shadow-small) !important;
+}
+
+.save-recipe-btn.save-active {
+  background: linear-gradient(135deg, var(--sage), var(--sage-dark)) !important;
+}
+
+/* Lista spesa */
+.lista-spesa li {
+  background: rgba(255, 255, 255, 0.72);
+  margin-bottom: 0.55rem;
+  border: 1px solid var(--line) !important;
+  border-radius: 18px !important;
+  padding: 0.85rem 0.75rem !important;
+}
+
+.totale {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 1rem;
+  box-shadow: var(--shadow-small);
+}
+
+/* Preparazione */
+.preparazione-lista li {
+  background: linear-gradient(135deg, rgba(8, 123, 99, 0.09), rgba(255, 255, 255, 0.85)) !important;
+  border: 1px solid rgba(8, 123, 99, 0.10);
+  border-radius: 20px !important;
+}
+
+/* Salvate */
+.saved-page {
+  border-radius: 28px !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.saved-card {
+  border-radius: 22px !important;
+  background: #ffffff !important;
+  box-shadow: var(--shadow-small);
+}
+
+.saved-actions button {
+  border-radius: 16px !important;
+}
