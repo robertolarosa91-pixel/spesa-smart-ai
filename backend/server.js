@@ -14,15 +14,24 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.options('*', cors());
+app.options(/.*/, cors());
 
 app.use(express.json());
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODELS = [
+  // Prima i più leggeri/economici
   'gemini-2.5-flash-lite',
-  'gemini-2.0-flash',
-  'gemini-2.5-flash'
+  'gemini-2.5-flash',
+
+  // Nuovi modelli, se disponibili sul tuo progetto
+  'gemini-3.1-flash-lite',
+  'gemini-3.5-flash',
+  'gemini-3-flash-preview',
+
+  // Ultima ruota di scorta: Gemma tramite Gemini API
+  'gemma-4-31b-it',
+  'gemma-4-26b-a4b-it'
 ];
 
 function getGeminiUrl(model) {
@@ -507,7 +516,7 @@ ISTRUZIONI:
 14. Se è richiesto un livello di piccantezza, adattalo negli ingredienti (es. peperoncino, spezie piccanti) mantenendo la ricetta coerente con il tipo di pasto.
 15. Rispondi SOLO in JSON valido, senza testo fuori dal JSON. Non inserire virgole finali dopo l'ultimo elemento di array o oggetti.
 
-Formato richiesto. Dentro "ricette" devi generare esattamente 6 oggetti come questo esempio:
+Formato richiesto. Dentro "ricette" devi generare esattamente 3 oggetti come questo esempio:
 {
   "ricette": [
     {
@@ -667,7 +676,7 @@ async function callGemini(prompt) {
             ],
             generationConfig: {
               temperature: 0.4,
-              maxOutputTokens: 12000,
+              maxOutputTokens: 6000,
               responseMimeType: 'application/json'
             }
           })
@@ -697,16 +706,30 @@ async function callGemini(prompt) {
       lastError = data?.error?.message || `Errore Gemini HTTP ${response.status}`;
       console.error(`Gemini API error con ${model}, tentativo ${attempt}:`, lastError);
 
-      const quotaEsaurita = /exceeded your current quota|resource_exhausted/i.test(lastError);
+      const quotaEsaurita =
+        /exceeded your current quota|quota exceeded|resource_exhausted/i.test(lastError);
 
-      if (quotaEsaurita) {
-        // Quota giornaliera/di modello esaurita: inutile ritentare, passa subito al modello successivo
+      const modelloNonUsabile =
+        /not found|is not found|not supported|does not support|not available|model .* not/i.test(lastError);
+
+      const erroreTemporaneo =
+        isErroreTemporaneoGemini(response.status, lastError);
+
+      // Se il modello è finito, non disponibile o non supportato,
+      // passa subito al modello successivo.
+      if (
+        quotaEsaurita ||
+        modelloNonUsabile ||
+        response.status === 400 ||
+        response.status === 404
+      ) {
         break;
       }
 
-      if (isErroreTemporaneoGemini(response.status, lastError) && attempt < 3) {
+      // Se è solo sovraccarico temporaneo, fai un retry breve.
+      if (erroreTemporaneo && attempt < 2) {
         const retryAfterHeader = response.headers.get('retry-after');
-        const attesa = retryAfterHeader ? Number(retryAfterHeader) * 1000 : 3000 * attempt;
+        const attesa = retryAfterHeader ? Number(retryAfterHeader) * 1000 : 1500 * attempt;
         await sleep(attesa);
         continue;
       }
@@ -783,13 +806,27 @@ try {
   const msg = String(e.message || '').toLowerCase();
 
   const eErroreDaGestireConFallback =
-    /quota|exceeded|high demand|overloaded|resource_exhausted|unavailable|timeout/i.test(msg);
+    /quota|exceeded|high demand|overloaded|resource_exhausted|unavailable|timeout|temporar|not found|not supported|not available|model/i.test(msg);
 
   if (eErroreDaGestireConFallback) {
     const fallback = buildFallbackResponse(req.body);
 
+    const ricetteFallbackConImmagini = await Promise.all(
+      (fallback.ricette || []).map(async (ricetta) => {
+        const immagine = await cercaImmagineRicetta(
+          ricetta.nome_ricerca || ricetta.nome
+        );
+
+        return {
+          ...ricetta,
+          immagine
+        };
+      })
+    );
+
     return res.json({
       ...fallback,
+      ricette: ricetteFallbackConImmagini,
       fallback: true
     });
   }
@@ -814,9 +851,26 @@ try {
   console.error('Errore parsing JSON AI:', e.message);
   console.error('Testo grezzo ricevuto dall AI:', rawText);
 
-  return res.status(502).json({
-    error: 'Impossibile interpretare la risposta AI come JSON',
-    raw: rawText
+  const fallback = buildFallbackResponse(req.body);
+
+  const ricetteFallbackConImmagini = await Promise.all(
+    (fallback.ricette || []).map(async (ricetta) => {
+      const immagine = await cercaImmagineRicetta(
+        ricetta.nome_ricerca || ricetta.nome
+      );
+
+      return {
+        ...ricetta,
+        immagine
+      };
+    })
+  );
+
+  return res.json({
+    ...fallback,
+    ricette: ricetteFallbackConImmagini,
+    fallback: true,
+    motivo_fallback: 'JSON AI non valido'
   });
 }
 
