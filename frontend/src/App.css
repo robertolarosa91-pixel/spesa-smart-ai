@@ -2010,3 +2010,26 @@ body::after {
   border-radius: 18px;
   overflow: hidden;
 }
+
+.ad-card {
+  outline: 2px dashed rgba(8, 123, 99, 0.35);
+}
+
+.ad-card {
+  display: block !important;
+  min-height: 125px !important;
+}
+
+.ad-ins {
+  display: block !important;
+  width: 100% !important;
+  min-height: 90px !important;
+}
+
+.ad-card-compact {
+  min-height: 330px !important;
+}
+
+.ad-card-compact .ad-ins {
+  min-height: 280px !important;
+}
