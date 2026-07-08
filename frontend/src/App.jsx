@@ -115,12 +115,14 @@ async function esci() {
 }
 
 function idRicettaFirestore(ricetta) {
-  return String(ricetta?.nome || 'ricetta')
+  const id = String(ricetta?.nome || 'ricetta')
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '');
+
+  return id || 'ricetta';
 }
 
 async function salvaRicetta(ricetta) {
@@ -130,6 +132,8 @@ async function salvaRicetta(ricetta) {
   }
 
   try {
+    setErrore(null);
+
     const idRicetta = idRicettaFirestore(ricetta);
 
     const ricettaPulita = JSON.parse(JSON.stringify({
@@ -149,7 +153,6 @@ async function salvaRicetta(ricetta) {
     );
 
     await caricaRicetteSalvate();
-    setErrore(null);
   } catch (err) {
     console.error('Errore salvataggio ricetta:', err);
     setErrore('Non sono riuscito a salvare la ricetta.');
@@ -161,6 +164,8 @@ async function rimuoviRicettaSalvata(ricettaOId) {
   if (!utente) return;
 
   try {
+    setErrore(null);
+
     const idRicetta =
       typeof ricettaOId === 'string'
         ? ricettaOId
@@ -168,71 +173,15 @@ async function rimuoviRicettaSalvata(ricettaOId) {
 
     setRicetteSalvate(prev => prev.filter(r => r.id !== idRicetta));
 
-    await deleteDoc(doc(db, 'utenti', utente.uid, 'ricette_salvate', idRicetta));
-
-    await caricaRicetteSalvate();
-    setErrore(null);
-  } catch (err) {
-    console.error('Errore rimozione ricetta:', err);
-    setErrore('Non sono riuscito a rimuovere la ricetta salvata.');
-    await caricaRicetteSalvate();
-  }
-}
-
-function ricettaGiaSalvata(ricetta) {
-  const idRicetta = idRicettaFirestore(ricetta);
-  return ricetteSalvate.some(r => r.id === idRicetta);
-}
-
-async function togglePreferito(ricetta, event) {
-  event?.stopPropagation();
-
-  if (!utente) {
-    setErrore('Accedi con Google per salvare le ricette tra i preferiti.');
-    return;
-  }
-
-  const idRicetta = idRicettaFirestore(ricetta);
-
-  if (ricettaGiaSalvata(ricetta)) {
-    await rimuoviRicettaSalvata(idRicetta);
-  } else {
-    await salvaRicetta(ricetta);
-  }
-}
-
-  try {
-    const idRicetta = idRicettaFirestore(ricetta);
-
-    const ricettaPulita = JSON.parse(JSON.stringify({
-      ...ricetta,
-      salvata_il: new Date().toISOString()
-    }));
-
-    await setDoc(
-      doc(db, 'utenti', utente.uid, 'ricette_salvate', idRicetta),
-      ricettaPulita,
-      { merge: true }
+    await deleteDoc(
+      doc(db, 'utenti', utente.uid, 'ricette_salvate', idRicetta)
     );
 
     await caricaRicetteSalvate();
-    setErrore(null);
-  } catch (err) {
-    console.error('Errore salvataggio ricetta:', err);
-    setErrore('Non sono riuscito a salvare la ricetta.');
-  }
-}
-
-async function rimuoviRicettaSalvata(idRicetta) {
-  if (!utente) return;
-
-  try {
-    await deleteDoc(doc(db, 'utenti', utente.uid, 'ricette_salvate', idRicetta));
-    await caricaRicetteSalvate();
-    setErrore(null);
   } catch (err) {
     console.error('Errore rimozione ricetta:', err);
     setErrore('Non sono riuscito a rimuovere la ricetta salvata.');
+    await caricaRicetteSalvate();
   }
 }
 
@@ -248,8 +197,6 @@ async function togglePreferito(ricetta, event) {
     setErrore('Accedi con Google per salvare le ricette tra i preferiti.');
     return;
   }
-
-  setErrore(null);
 
   if (ricettaGiaSalvata(ricetta)) {
     await rimuoviRicettaSalvata(ricetta);
@@ -453,58 +400,58 @@ const preparazioneAttiva =
             <h2>Ricette</h2>
             {ricetteVisibili.map((r, indexLocale) => {
   const i = inizioRicette + indexLocale;
+  const salvata = ricettaGiaSalvata(r);
 
   return (
-                           <div
-                key={i}
-                className="recipe-wrapper fade-in"
-                style={{
-                  animationDelay: `${indexLocale * 0.08}s`
-                }}
-              >
-                <div
-                  className="card recipe-card"
-                  onClick={() => {
-                    setRicettaSelezionata(i);
-                    setProdottiAcquistati({});
-                  }}
-                  style={{
-                    cursor: 'pointer',
-                    border: ricettaSelezionata === i ? '2px solid #247c69' : undefined
-                  }}
-                >
-                  <div className="card-visual">
-                    {r.immagine ? (
-                      <img className="card-image" src={r.immagine} alt={r.nome} />
-                    ) : (
-                      <div className="card-emoji">{r.emoji || '🍽️'}</div>
-                    )}
-                  </div>
+    <div
+      key={i}
+      className="recipe-wrapper fade-in"
+      style={{
+        animationDelay: `${indexLocale * 0.08}s`
+      }}
+    >
+      <div
+        className="card recipe-card"
+        onClick={() => {
+          setRicettaSelezionata(i);
+          setProdottiAcquistati({});
+        }}
+        style={{
+          cursor: 'pointer',
+          border: ricettaSelezionata === i ? '2px solid #247c69' : undefined
+        }}
+      >
+        <div className="card-visual">
+          {r.immagine ? (
+            <img className="card-image" src={r.immagine} alt={r.nome} />
+          ) : (
+            <div className="card-emoji">{r.emoji || '🍽️'}</div>
+          )}
+        </div>
 
-                  <div className="card-body">
-                    <h3>{r.nome}</h3>
-                    <p>{r.descrizione_breve}</p>
+        <div className="card-body">
+          <h3>{r.nome}</h3>
+          <p>{r.descrizione_breve}</p>
 
-                    <div className="recipe-meta">
-                      <span className="tempo">⏱ {r.tempo_preparazione_minuti} min</span>
-                      <span className={`difficulty difficulty-${(r.difficolta || 'Facile').toLowerCase()}`}>
-                        {r.difficolta || 'Facile'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+          <div className="recipe-meta">
+            <span className="tempo">⏱ {r.tempo_preparazione_minuti} min</span>
+            <span className={`difficulty difficulty-${(r.difficolta || 'Facile').toLowerCase()}`}>
+              {r.difficolta || 'Facile'}
+            </span>
+          </div>
+        </div>
+      </div>
 
-                <button
-                  type="button"
-                  className={`save-recipe-btn ${ricettaGiaSalvata(r) ? 'save-active' : ''}`}
-                  onClick={(e) => togglePreferito(r, e)}
-                >
-                  {ricettaGiaSalvata(r) ? '❤️ Salvata' : '🤍 Salva ricetta'}
-                </button>
-              </div>
-         
-             );
-            })}
+      <button
+        type="button"
+        className={`save-recipe-btn ${salvata ? 'save-active' : ''}`}
+        onClick={(e) => togglePreferito(r, e)}
+      >
+        {salvata ? '❤️ Salvata' : '🤍 Salva ricetta'}
+      </button>
+    </div>
+  );
+})}
 
 
 {totalePagineRicette > 1 && (
