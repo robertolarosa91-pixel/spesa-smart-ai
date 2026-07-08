@@ -114,22 +114,72 @@ async function esci() {
   setMostraSalvate(false);
 }
 
+function getIdRicetta(ricetta) {
+  return String(ricetta?.nome || 'ricetta')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
+}
+
 async function salvaRicetta(ricetta) {
-  if (!utente) return;
-  const idRicetta = ricetta.nome.toLowerCase().replace(/[^a-z0-9]/g, '_');
-  await setDoc(doc(db, 'utenti', utente.uid, 'ricette_salvate', idRicetta), ricetta);
+  if (!utente) {
+    setErrore('Accedi con Google per salvare le ricette tra i preferiti.');
+    return;
+  }
+
+  const idRicetta = getIdRicetta(ricetta);
+
+  const ricettaDaSalvare = JSON.parse(JSON.stringify({
+    ...ricetta,
+    salvata_il: new Date().toISOString(),
+    supermercato: form.supermercato,
+    pasto: form.pasto,
+    persone: form.persone
+  }));
+
+  await setDoc(
+    doc(db, 'utenti', utente.uid, 'ricette_salvate', idRicetta),
+    ricettaDaSalvare,
+    { merge: true }
+  );
+
+  setErrore(null);
   await caricaRicetteSalvate();
 }
 
-async function rimuoviRicettaSalvata(idRicetta) {
+async function rimuoviRicettaSalvata(idOrRicetta) {
   if (!utente) return;
+
+  const idRicetta =
+    typeof idOrRicetta === 'string'
+      ? idOrRicetta
+      : getIdRicetta(idOrRicetta);
+
   await deleteDoc(doc(db, 'utenti', utente.uid, 'ricette_salvate', idRicetta));
+  setErrore(null);
   await caricaRicetteSalvate();
 }
 
 function ricettaGiaSalvata(ricetta) {
-  const idRicetta = ricetta.nome.toLowerCase().replace(/[^a-z0-9]/g, '_');
+  const idRicetta = getIdRicetta(ricetta);
   return ricetteSalvate.some(r => r.id === idRicetta);
+}
+
+async function togglePreferito(ricetta, event) {
+  event?.stopPropagation();
+
+  if (!utente) {
+    setErrore('Accedi con Google per salvare le ricette tra i preferiti.');
+    return;
+  }
+
+  if (ricettaGiaSalvata(ricetta)) {
+    await rimuoviRicettaSalvata(ricetta);
+  } else {
+    await salvaRicetta(ricetta);
+  }
 }
 const [paginaRicette, setPaginaRicette] = useState(0);
 const [prodottiAcquistati, setProdottiAcquistati] = useState({});
@@ -270,6 +320,20 @@ const preparazioneAttiva =
 
   return (
   <div className="page">
+    <div className="auth-bar">
+      {utente ? (
+        <>
+          <span className="auth-user">Ciao, {utente.displayName?.split(' ')[0]}</span>
+          <button type="button" className="auth-btn" onClick={() => setMostraSalvate(m => !m)}>
+            ❤️ Salvate ({ricetteSalvate.length})
+          </button>
+          <button type="button" className="auth-btn auth-btn-secondary" onClick={esci}>Esci</button>
+        </>
+      ) : (
+        <button type="button" className="auth-btn" onClick={accedi}>Accedi con Google</button>
+      )}
+    </div>
+
     <div className="result-hero">
   <span className="eyebrow">Ecco cosa ti serve</span>
   <h1>La tua spesa è pronta</h1>
@@ -328,6 +392,16 @@ const preparazioneAttiva =
     border: ricettaSelezionata === i ? '2px solid #247c69' : undefined
   }}
 >
+                <button
+                  type="button"
+                  className={`heart-btn ${ricettaGiaSalvata(r) ? 'heart-active' : ''}`}
+                  onClick={(e) => togglePreferito(r, e)}
+                  aria-label={ricettaGiaSalvata(r) ? 'Rimuovi dai preferiti' : 'Salva nei preferiti'}
+                  title={ricettaGiaSalvata(r) ? 'Rimuovi dai preferiti' : 'Salva nei preferiti'}
+                >
+                  {ricettaGiaSalvata(r) ? '♥' : '♡'}
+                </button>
+
                 <div className="card-visual">
                   {r.immagine ? (
                     <img className="card-image" src={r.immagine} alt={r.nome} />
@@ -337,8 +411,31 @@ const preparazioneAttiva =
                 </div>
 
                 <div className="card-body">
-                  <h3>{r.nome}</h3>
-                  <p>{r.descrizione_breve}</p>
+  <div className="recipe-title-row">
+    <h3>{r.nome}</h3>
+
+    {utente && (
+      <button
+        type="button"
+        className={`heart-btn ${ricettaGiaSalvata(r) ? 'heart-active' : ''}`}
+        onClick={(e) => {
+          e.stopPropagation();
+
+          if (ricettaGiaSalvata(r)) {
+            const idRicetta = r.nome.toLowerCase().replace(/[^a-z0-9]/g, '_');
+            rimuoviRicettaSalvata(idRicetta);
+          } else {
+            salvaRicetta(r);
+          }
+        }}
+        aria-label="Salva ricetta"
+      >
+        {ricettaGiaSalvata(r) ? '❤️' : '🤍'}
+      </button>
+    )}
+  </div>
+
+  <p>{r.descrizione_breve}</p>
                   <div className="recipe-meta">
   <span className="tempo">⏱ {r.tempo_preparazione_minuti} min</span>
   <span className={`difficulty difficulty-${(r.difficolta || 'Facile').toLowerCase()}`}>
