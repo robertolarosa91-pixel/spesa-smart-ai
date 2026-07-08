@@ -599,6 +599,9 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Int
 }
 
 .saved-panel {
+  display: block !important;
+  position: relative;
+  z-index: 30;
   background: #ffffff;
   border: 1px solid var(--line);
   border-radius: 18px;
@@ -672,8 +675,25 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Int
   border-color: #145c4d;
 }
 
-.saved-panel {
-  display: block !important;
-  position: relative;
-  z-index: 30;
+.auth-home-btn {
+  background: #ffffff;
+  color: var(--sage);
+  border: 2px solid var(--sage);
+}
+
+.saved-page {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 1rem;
+  margin-top: 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+}
+
+.saved-page h1 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.7rem;
+  margin: 0 0 1rem;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 0.45rem;
 }
