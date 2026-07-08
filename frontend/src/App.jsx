@@ -35,9 +35,9 @@ const PASTI = [
 ];
 
 const LIVELLI_PICCANTEZZA = [
-  { id: 'nessuna', label: 'Delicato' },
-  { id: 'media', label: "Un po' piccante" },
-  { id: 'alta', label: 'Molto piccante' }
+  { id: 'nessuna', label: 'Nessuno', emoji: '🚫' },
+  { id: 'media', label: "Un po' piccante", emoji: '🌶️' },
+  { id: 'alta', label: 'Molto piccante', emoji: '🌶️🌶️' }
 ];
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://spesa-smart-ai-backend.onrender.com';
@@ -318,6 +318,7 @@ function apriRicettaSalvata(ricetta) {
 
 function renderAccountArea() {
   const mostraTastoHome = Boolean(mostraSalvate || risultato);
+  const mostraSmartStrip = !mostraSalvate && !risultato;
 
   return (
     <header className="app-header">
@@ -375,9 +376,59 @@ function renderAccountArea() {
           </div>
         )}
       </div>
+
+      {mostraSmartStrip && (
+        <div className="smart-strip">
+          <div>
+            <span>🧠</span>
+            <strong>AI smart</strong>
+          </div>
+
+          <div>
+            <span>🛒</span>
+            <strong>Lista pronta</strong>
+          </div>
+
+          <div>
+            <span>❤️</span>
+            <strong>Preferiti</strong>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
+
+function renderLoadingOverlay() {
+  if (!loading) return null;
+
+  return (
+    <div className="loading-overlay" role="status" aria-live="polite">
+      <div className="loading-card">
+        <div className="loading-orbit">
+          <span className="loading-cart">🛒</span>
+          <span className="loading-dot loading-dot-1">🥕</span>
+          <span className="loading-dot loading-dot-2">🍅</span>
+          <span className="loading-dot loading-dot-3">🥦</span>
+        </div>
+
+        <h2>Sto creando la tua spesa intelligente</h2>
+        <p>Analizzo gusti, supermercato, ricette e lista della spesa...</p>
+
+        <div className="loading-progress">
+          <span />
+        </div>
+
+        <div className="loading-tags">
+          <span>🧠 AI</span>
+          <span>🍽️ Ricette</span>
+          <span>🛒 Lista pronta</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const [paginaRicette, setPaginaRicette] = useState(0);
 const [prodottiAcquistati, setProdottiAcquistati] = useState({});
 
@@ -503,6 +554,7 @@ if (mostraSalvate) {
   return (
     <div className="page">
       {renderAccountArea()}
+      {renderLoadingOverlay()}
 
       <div className="saved-page fade-in">
         <h1>Ricette salvate</h1>
@@ -563,9 +615,14 @@ const preparazioneAttiva =
   return (
   <div className="page">
     {renderAccountArea()}
+    {renderLoadingOverlay()}
 
     <div className="result-hero">
-  <span className="eyebrow">Ecco cosa ti serve</span>
+  <div className="result-topline">
+    <span className="eyebrow">Ecco cosa ti serve</span>
+    <span className="ai-badge">✨ Generato con AI</span>
+  </div>
+
   <h1>La tua spesa è pronta</h1>
 
   <div className="result-summary">
@@ -766,6 +823,7 @@ const preparazioneAttiva =
   return (
     <div className="page">
       {renderAccountArea()}
+      {renderLoadingOverlay()}
 
       <div className="progress-track">
         {STEPS.map((label, i) => (
@@ -843,18 +901,22 @@ const preparazioneAttiva =
             </button>
 
             <label className="field-label">Livello di piccantezza</label>
-            <div className="chips">
-              {LIVELLI_PICCANTEZZA.map(l => (
-                <button
-                  type="button"
-                  key={l.id}
-                  className={`chip ${form.piccantezza === l.id ? 'chip-active' : ''}`}
-                  onClick={() => setForm(f => ({ ...f, piccantezza: l.id }))}
-                >
-                  {l.label}
-                </button>
-              ))}
-            </div>
+
+<div className="spice-picker">
+  {LIVELLI_PICCANTEZZA.map(l => (
+    <button
+      type="button"
+      key={l.id}
+      className={`spice-btn ${form.piccantezza === l.id ? 'spice-active' : ''}`}
+      onClick={() => setForm(f => ({ ...f, piccantezza: l.id }))}
+      aria-label={l.label}
+      title={l.label}
+    >
+      <span className="spice-emoji">{l.emoji}</span>
+      <span className="sr-only">{l.label}</span>
+    </button>
+  ))}
+</div>
 
             <label className="field-label">Intolleranze / allergie</label>
             <div className="chips">
