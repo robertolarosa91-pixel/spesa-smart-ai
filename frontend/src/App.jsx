@@ -48,6 +48,37 @@ const ADSENSE_SLOT_BREAK = import.meta.env.VITE_ADSENSE_SLOT_BREAK || '944895965
 
 const STEPS = ['Chi mangia', 'Negozio', 'Gusti', 'Riepilogo'];
 
+function caricaScriptAdSense() {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined') {
+      resolve();
+      return;
+    }
+
+    const scriptGiaPresente = document.querySelector(
+      'script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]'
+    );
+
+    if (scriptGiaPresente) {
+      resolve();
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.async = true;
+    script.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`;
+    script.crossOrigin = 'anonymous';
+
+    script.onload = () => resolve();
+    script.onerror = () => {
+      console.warn('Script AdSense non caricato');
+      resolve();
+    };
+
+    document.head.appendChild(script);
+  });
+}
+
 function AdCard({ slot, compact = false }) {
   const adPushedRef = useRef(false);
 
@@ -55,17 +86,25 @@ function AdCard({ slot, compact = false }) {
     if (!ADSENSE_CLIENT || !slot) return;
     if (adPushedRef.current) return;
 
-    const timer = setTimeout(() => {
-      try {
-        window.adsbygoogle = window.adsbygoogle || [];
-        window.adsbygoogle.push({});
-        adPushedRef.current = true;
-      } catch (err) {
-        console.warn('AdSense non pronto:', err);
-      }
-    }, 500);
+    let annullato = false;
 
-    return () => clearTimeout(timer);
+    caricaScriptAdSense().then(() => {
+      setTimeout(() => {
+        if (annullato) return;
+
+        try {
+          window.adsbygoogle = window.adsbygoogle || [];
+          window.adsbygoogle.push({});
+          adPushedRef.current = true;
+        } catch (err) {
+          console.warn('AdSense non pronto:', err);
+        }
+      }, 700);
+    });
+
+    return () => {
+      annullato = true;
+    };
   }, [slot]);
 
   return (
@@ -74,10 +113,13 @@ function AdCard({ slot, compact = false }) {
 
       <ins
         className="adsbygoogle ad-ins"
-        style={{ display: 'block' }}
+        style={{
+          display: 'block',
+          minHeight: compact ? 280 : 90
+        }}
         data-ad-client={ADSENSE_CLIENT}
         data-ad-slot={slot}
-        data-ad-format="auto"
+        data-ad-format={compact ? 'rectangle' : 'auto'}
         data-full-width-responsive="true"
       />
     </section>
@@ -559,9 +601,10 @@ function renderAdBreakOverlay() {
           <span>🛒</span>
 
           <div>
-            <strong>Pausa sponsorizzata</strong>
-            <small>Grazie, ci aiuti a mantenere Spesa Smart AI gratuita</small>
-          </div>
+  <strong>Pausa sponsorizzata</strong>
+  <small>Grazie, ci aiuti a mantenere Spesa Smart AI gratuita</small>
+  <small>Attendi qualche secondo, poi puoi continuare</small>
+</div>
         </div>
 
         <AdCard slot={ADSENSE_SLOT_BREAK} compact />
@@ -797,8 +840,28 @@ useEffect(() => {
     }));
   }
 
-  function next() { setStep(s => Math.min(s + 1, STEPS.length - 1)); }
-  function back() { setStep(s => Math.max(s - 1, 0)); }
+  function scrollInAlto() {
+  setTimeout(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'smooth'
+    });
+
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, 80);
+}
+
+function next() {
+  setStep(s => Math.min(s + 1, STEPS.length - 1));
+  scrollInAlto();
+}
+
+function back() {
+  setStep(s => Math.max(s - 1, 0));
+  scrollInAlto();
+}
   function toggleProdottoAcquistato(index) {
   setProdottiAcquistati(prev => ({
     ...prev,
@@ -830,6 +893,7 @@ setProdottiAcquistati({});
 }
 
       setRisultato(data);
+      scrollInAlto();
     } catch (err) {
       setErrore(err.message);
     } finally {
@@ -872,6 +936,7 @@ async function generaAltreRicette() {
 
     salvaInCronologia(data);
     setRisultato(data);
+    scrollInAlto();
   } catch (err) {
     setErrore(err.message);
   } finally {
