@@ -620,3 +620,35 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Int
 .heart-active {
   filter: drop-shadow(0 2px 4px rgba(232, 84, 62, 0.25));
 }
+
+.recipe-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-bottom: 1.1rem;
+}
+
+.recipe-wrapper .card {
+  margin-bottom: 0;
+}
+
+.save-recipe-btn {
+  width: 100%;
+  border: 2px solid #247c69;
+  background: #ffffff;
+  color: #247c69;
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.save-recipe-btn.save-active {
+  background: #247c69;
+  color: #ffffff;
+}
+
+.save-recipe-btn:active {
+  transform: scale(0.98);
+}
