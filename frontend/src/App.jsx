@@ -106,6 +106,10 @@ const [ricetteSalvate, setRicetteSalvate] = useState([]);
 const [mostraSalvate, setMostraSalvate] = useState(false);
 const [cronologia, setCronologia] = useState([]);
 
+const [mostraAdBreak, setMostraAdBreak] = useState(false);
+const [azioneDopoAd, setAzioneDopoAd] = useState(null);
+const [adCountdown, setAdCountdown] = useState(3);
+
 useEffect(() => {
   const unsubscribe = onAuthStateChanged(auth, (user) => {
     setUtente(user);
@@ -125,6 +129,25 @@ useEffect(() => {
 
   caricaRicetteSalvate();
 }, [utente]);
+
+useEffect(() => {
+  if (!mostraAdBreak) return;
+
+  setAdCountdown(3);
+
+  const interval = setInterval(() => {
+    setAdCountdown(prev => {
+      if (prev <= 1) {
+        clearInterval(interval);
+        return 0;
+      }
+
+      return prev - 1;
+    });
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, [mostraAdBreak]);
 
 
 async function accedi() {
@@ -469,6 +492,88 @@ function renderLoadingOverlay() {
           <span>🍽️ Ricette</span>
           <span>🛒 Lista pronta</span>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function getAdCounterKey() {
+  return utente ? `ad_rigenerazioni_${utente.uid}` : 'ad_rigenerazioni_ospite';
+}
+
+function registraRigenerazioneEControllaAd() {
+  try {
+    const key = getAdCounterKey();
+    const valoreAttuale = Number(localStorage.getItem(key) || '0');
+    const nuovoValore = valoreAttuale + 1;
+
+    localStorage.setItem(key, String(nuovoValore));
+
+    return nuovoValore % 3 === 0;
+  } catch {
+    return false;
+  }
+}
+
+function apriAdBreak(azione = null) {
+  setAdCountdown(3);
+  setAzioneDopoAd(() => azione);
+  setMostraAdBreak(true);
+}
+
+function chiudiAdBreak() {
+  if (adCountdown > 0) return;
+
+  const azione = azioneDopoAd;
+
+  setMostraAdBreak(false);
+  setAzioneDopoAd(null);
+
+  if (typeof azione === 'function') {
+    setTimeout(() => {
+      azione();
+    }, 180);
+  }
+}
+
+function generaAltreRicetteConAdBreak() {
+  if (loading || retrySeconds > 0) return;
+
+  const deveMostrareAd = registraRigenerazioneEControllaAd();
+
+  if (deveMostrareAd) {
+    apriAdBreak(() => generaAltreRicette());
+    return;
+  }
+
+  generaAltreRicette();
+}
+
+function renderAdBreakOverlay() {
+  if (!mostraAdBreak) return null;
+
+  return (
+    <div className="ad-break-overlay">
+      <div className="ad-break-card">
+        <div className="ad-break-top">
+          <span>🛒</span>
+
+          <div>
+            <strong>Pausa sponsorizzata</strong>
+            <small>Grazie, ci aiuti a mantenere Spesa Smart AI gratuita</small>
+          </div>
+        </div>
+
+        <AdCard slot={ADSENSE_SLOT_BREAK} compact />
+
+        <button
+          type="button"
+          className="ad-continue-btn"
+          onClick={chiudiAdBreak}
+          disabled={adCountdown > 0}
+        >
+          {adCountdown > 0 ? `Continua tra ${adCountdown}s` : 'Continua'}
+        </button>
       </div>
     </div>
   );
@@ -851,6 +956,7 @@ const preparazioneAttiva =
   <div className="page">
     {renderAccountArea()}
     {renderLoadingOverlay()}
+    {renderAdBreakOverlay()}
 
     <div className="result-hero">
   <div className="result-topline">
@@ -879,7 +985,7 @@ const preparazioneAttiva =
 </div>
 
 <div className="result-actions">
-  <button className="submit-btn" onClick={generaAltreRicette} disabled={loading || retrySeconds > 0}>
+  <button className="submit-btn" onClick={generaAltreRicetteConAdBreak} disabled={loading || retrySeconds > 0}>
     {loading
       ? 'Genero nuove ricette...'
       : retrySeconds > 0
