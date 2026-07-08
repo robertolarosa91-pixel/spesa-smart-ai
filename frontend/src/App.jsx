@@ -146,6 +146,7 @@ const [ricettaSelezionata, setRicettaSelezionata] = useState(0);
 const [utente, setUtente] = useState(null);
 const [ricetteSalvate, setRicetteSalvate] = useState([]);
 const [mostraSalvate, setMostraSalvate] = useState(false);
+const [mostraCronologia, setMostraCronologia] = useState(false);
 const [cronologia, setCronologia] = useState([]);
 
 const [mostraAdBreak, setMostraAdBreak] = useState(false);
@@ -237,19 +238,44 @@ function vaiHome(event) {
   event?.stopPropagation();
 
   setMostraSalvate(false);
+  setMostraCronologia(false);
   setRisultato(null);
   setRicettaSelezionata(0);
   setPaginaRicette(0);
   setProdottiAcquistati({});
   setErrore(null);
   setStep(0);
+
+  setTimeout(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, 80);
 }
 
 function vaiSalvate(event) {
   event?.preventDefault();
   event?.stopPropagation();
 
+  setMostraCronologia(false);
   setMostraSalvate(true);
+
+  setTimeout(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, 80);
+}
+
+function vaiCronologia(event) {
+  event?.preventDefault();
+  event?.stopPropagation();
+
+  setMostraSalvate(false);
+  setMostraCronologia(true);
+  setRisultato(null);
+  setErrore(null);
+  setStep(0);
+
+  setTimeout(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  }, 80);
 }
 
 function getStorageKey() {
@@ -427,8 +453,8 @@ function apriRicettaSalvata(ricetta) {
 }
 
 function renderAccountArea() {
-  const mostraTastoHome = Boolean(mostraSalvate || risultato);
-  const mostraSmartStrip = !mostraSalvate && !risultato;
+  const mostraTastoHome = Boolean(mostraSalvate || mostraCronologia || risultato);
+  const mostraSmartStrip = !mostraSalvate && !mostraCronologia && !risultato;
 
   return (
     <header className="app-header">
@@ -475,6 +501,16 @@ function renderAccountArea() {
                 onClick={esci}
               >
                 Esci
+              </button>
+            </div>
+
+            <div className="auth-actions auth-actions-secondary">
+              <button
+                type="button"
+                className={`auth-btn auth-history-btn ${mostraCronologia ? 'auth-btn-active' : ''}`}
+                onClick={vaiCronologia}
+              >
+                🕘 Cronologia ({cronologia.length})
               </button>
             </div>
           </>
@@ -670,6 +706,21 @@ function salvaInCronologia(data) {
   salvaCronologiaLocale(nuovaCronologia);
 }
 
+function eliminaElementoCronologia(id, event) {
+  event?.preventDefault();
+  event?.stopPropagation();
+
+  const nuovaCronologia = cronologia.filter(item => item.id !== id);
+
+  setCronologia(nuovaCronologia);
+  salvaCronologiaLocale(nuovaCronologia);
+}
+
+function svuotaCronologia() {
+  setCronologia([]);
+  salvaCronologiaLocale([]);
+}
+
 function apriDaCronologia(item) {
   if (item.form) {
     setForm(f => ({
@@ -680,6 +731,7 @@ function apriDaCronologia(item) {
 
   setRisultato(item.risultato);
   setMostraSalvate(false);
+  setMostraCronologia(false);
   setRicettaSelezionata(0);
   setPaginaRicette(0);
   setProdottiAcquistati({});
@@ -953,6 +1005,65 @@ async function generaAltreRicette() {
   setRetrySeconds(0);
   setStep(0);
   setMostraSalvate(false);
+  setMostraCronologia(false);
+}
+
+if (mostraCronologia) {
+  return (
+    <div className="page">
+      {renderAccountArea()}
+      {renderLoadingOverlay()}
+
+      <div className="saved-page history-page fade-in">
+        <div className="history-page-head">
+          <div>
+            <h1>Cronologia</h1>
+            <p>Le ultime spese generate</p>
+          </div>
+
+          {cronologia.length > 0 && (
+            <button
+              type="button"
+              className="clear-history-btn"
+              onClick={svuotaCronologia}
+            >
+              Svuota
+            </button>
+          )}
+        </div>
+
+        {cronologia.length === 0 ? (
+          <p className="saved-empty">Non hai ancora generato spese.</p>
+        ) : (
+          <div className="history-page-list">
+            {cronologia.map((item) => (
+              <div key={item.id} className="history-page-card">
+                <button
+                  type="button"
+                  className="history-open-card"
+                  onClick={() => apriDaCronologia(item)}
+                >
+                  <strong>{item.titolo}</strong>
+
+                  <span>
+                    €{Number(item.form?.budget || 0).toFixed(0)} · {PASTI.find(p => p.id === item.form?.pasto)?.label || 'Pasto'} · {SUPERMERCATI.find(s => s.id === item.form?.supermercato)?.label || 'Supermercato'}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  className="history-delete-btn"
+                  onClick={(e) => eliminaElementoCronologia(item.id, e)}
+                >
+                  Elimina
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 if (mostraSalvate) {
@@ -1420,30 +1531,7 @@ const preparazioneAttiva =
         )}
       </div>
 
-      {step === 0 && cronologia.length > 0 && (
-        <div className="history-panel fade-in">
-          <div className="history-header">
-            <h2>Cronologia</h2>
-            <span>Ultime spese generate</span>
-          </div>
-
-          <div className="history-list">
-            {cronologia.slice(0, 4).map((item) => (
-              <button
-                type="button"
-                key={item.id}
-                className="history-card"
-                onClick={() => apriDaCronologia(item)}
-              >
-                <strong>{item.titolo}</strong>
-                <span>
-                  €{Number(item.form?.budget || 0).toFixed(0)} · {PASTI.find(p => p.id === item.form?.pasto)?.label || 'Pasto'}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Cronologia spostata nella pagina dedicata */}
 
       <div className="nav-bar">
         {step > 0 && <button className="nav-btn nav-back" onClick={back}>Indietro</button>}
