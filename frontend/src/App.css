@@ -552,3 +552,71 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Int
 .result-actions .submit-btn {
   margin-top: 0;
 }
+
+.recipe-card {
+  position: relative;
+}
+
+.heart-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: white;
+  color: #b64532;
+  font-size: 27px;
+  font-weight: 800;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.heart-btn:active {
+  transform: scale(0.94);
+}
+
+.heart-active {
+  background: #FDE8E5;
+  border-color: var(--tomato);
+  color: var(--tomato);
+}
+
+.recipe-card .card-body {
+  padding-right: 2.7rem;
+}
+
+.recipe-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.recipe-title-row h3 {
+  margin-right: 6px;
+}
+
+.heart-btn {
+  border: none;
+  background: transparent;
+  font-size: 1.45rem;
+  cursor: pointer;
+  padding: 2px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.heart-btn:active {
+  transform: scale(0.92);
+}
+
+.heart-active {
+  filter: drop-shadow(0 2px 4px rgba(232, 84, 62, 0.25));
+}
