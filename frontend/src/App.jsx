@@ -114,7 +114,7 @@ async function esci() {
   setMostraSalvate(false);
 }
 
-function getIdRicetta(ricetta) {
+function idRicettaFirestore(ricetta) {
   return String(ricetta?.nome || 'ricetta')
     .toLowerCase()
     .normalize('NFD')
@@ -129,41 +129,100 @@ async function salvaRicetta(ricetta) {
     return;
   }
 
-  const idRicetta = getIdRicetta(ricetta);
+  try {
+    const idRicetta = idRicettaFirestore(ricetta);
 
-  const ricettaDaSalvare = JSON.parse(JSON.stringify({
-    ...ricetta,
-    salvata_il: new Date().toISOString(),
-    supermercato: form.supermercato,
-    pasto: form.pasto,
-    persone: form.persone
-  }));
+    const ricettaPulita = JSON.parse(JSON.stringify({
+      ...ricetta,
+      salvata_il: new Date().toISOString()
+    }));
 
-  await setDoc(
-    doc(db, 'utenti', utente.uid, 'ricette_salvate', idRicetta),
-    ricettaDaSalvare,
-    { merge: true }
-  );
+    await setDoc(
+      doc(db, 'utenti', utente.uid, 'ricette_salvate', idRicetta),
+      ricettaPulita,
+      { merge: true }
+    );
 
-  setErrore(null);
-  await caricaRicetteSalvate();
+    await caricaRicetteSalvate();
+    setErrore(null);
+  } catch (err) {
+    console.error('Errore salvataggio ricetta:', err);
+    setErrore('Non sono riuscito a salvare la ricetta.');
+  }
 }
 
-async function rimuoviRicettaSalvata(idOrRicetta) {
+async function rimuoviRicettaSalvata(idRicetta) {
   if (!utente) return;
 
-  const idRicetta =
-    typeof idOrRicetta === 'string'
-      ? idOrRicetta
-      : getIdRicetta(idOrRicetta);
-
-  await deleteDoc(doc(db, 'utenti', utente.uid, 'ricette_salvate', idRicetta));
-  setErrore(null);
-  await caricaRicetteSalvate();
+  try {
+    await deleteDoc(doc(db, 'utenti', utente.uid, 'ricette_salvate', idRicetta));
+    await caricaRicetteSalvate();
+    setErrore(null);
+  } catch (err) {
+    console.error('Errore rimozione ricetta:', err);
+    setErrore('Non sono riuscito a rimuovere la ricetta salvata.');
+  }
 }
 
 function ricettaGiaSalvata(ricetta) {
-  const idRicetta = getIdRicetta(ricetta);
+  const idRicetta = idRicettaFirestore(ricetta);
+  return ricetteSalvate.some(r => r.id === idRicetta);
+}
+
+async function togglePreferito(ricetta, event) {
+  event?.stopPropagation();
+
+  if (!utente) {
+    setErrore('Accedi con Google per salvare le ricette tra i preferiti.');
+    return;
+  }
+
+  const idRicetta = idRicettaFirestore(ricetta);
+
+  if (ricettaGiaSalvata(ricetta)) {
+    await rimuoviRicettaSalvata(idRicetta);
+  } else {
+    await salvaRicetta(ricetta);
+  }
+}
+
+  try {
+    const idRicetta = idRicettaFirestore(ricetta);
+
+    const ricettaPulita = JSON.parse(JSON.stringify({
+      ...ricetta,
+      salvata_il: new Date().toISOString()
+    }));
+
+    await setDoc(
+      doc(db, 'utenti', utente.uid, 'ricette_salvate', idRicetta),
+      ricettaPulita,
+      { merge: true }
+    );
+
+    await caricaRicetteSalvate();
+    setErrore(null);
+  } catch (err) {
+    console.error('Errore salvataggio ricetta:', err);
+    setErrore('Non sono riuscito a salvare la ricetta.');
+  }
+}
+
+async function rimuoviRicettaSalvata(idRicetta) {
+  if (!utente) return;
+
+  try {
+    await deleteDoc(doc(db, 'utenti', utente.uid, 'ricette_salvate', idRicetta));
+    await caricaRicetteSalvate();
+    setErrore(null);
+  } catch (err) {
+    console.error('Errore rimozione ricetta:', err);
+    setErrore('Non sono riuscito a rimuovere la ricetta salvata.');
+  }
+}
+
+function ricettaGiaSalvata(ricetta) {
+  const idRicetta = idRicettaFirestore(ricetta);
   return ricetteSalvate.some(r => r.id === idRicetta);
 }
 
@@ -411,29 +470,7 @@ const preparazioneAttiva =
                 </div>
 
                 <div className="card-body">
-  <div className="recipe-title-row">
-    <h3>{r.nome}</h3>
-
-    {utente && (
-      <button
-        type="button"
-        className={`heart-btn ${ricettaGiaSalvata(r) ? 'heart-active' : ''}`}
-        onClick={(e) => {
-          e.stopPropagation();
-
-          if (ricettaGiaSalvata(r)) {
-            const idRicetta = r.nome.toLowerCase().replace(/[^a-z0-9]/g, '_');
-            rimuoviRicettaSalvata(idRicetta);
-          } else {
-            salvaRicetta(r);
-          }
-        }}
-        aria-label="Salva ricetta"
-      >
-        {ricettaGiaSalvata(r) ? '❤️' : '🤍'}
-      </button>
-    )}
-  </div>
+  <h3>{r.nome}</h3>
 
   <p>{r.descrizione_breve}</p>
                   <div className="recipe-meta">
