@@ -666,3 +666,14 @@ body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'Int
   color: var(--tomato-dark);
   border: 2px solid var(--tomato);
 }
+
+.auth-btn-active {
+  background: #145c4d;
+  border-color: #145c4d;
+}
+
+.saved-panel {
+  display: block !important;
+  position: relative;
+  z-index: 30;
+}
