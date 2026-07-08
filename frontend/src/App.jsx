@@ -42,11 +42,47 @@ const LIVELLI_PICCANTEZZA = [
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://spesa-smart-ai-backend.onrender.com';
 
-const ADSENSE_CLIENT = import.meta.env.VITE_ADSENSE_CLIENT || '';
-const ADSENSE_SLOT_RESULTS = import.meta.env.VITE_ADSENSE_SLOT_RESULTS || '';
-const ADSENSE_SLOT_BREAK = import.meta.env.VITE_ADSENSE_SLOT_BREAK || '';
+const ADSENSE_CLIENT = import.meta.env.VITE_ADSENSE_CLIENT || 'ca-pub-1811722034305595';
+const ADSENSE_SLOT_RESULTS = import.meta.env.VITE_ADSENSE_SLOT_RESULTS || '9448959653';
+const ADSENSE_SLOT_BREAK = import.meta.env.VITE_ADSENSE_SLOT_BREAK || '9448959653';
 
 const STEPS = ['Chi mangia', 'Negozio', 'Gusti', 'Riepilogo'];
+
+function AdCard({ slot, compact = false }) {
+  const adPushedRef = useRef(false);
+
+  useEffect(() => {
+    if (!ADSENSE_CLIENT || !slot) return;
+    if (adPushedRef.current) return;
+
+    const timer = setTimeout(() => {
+      try {
+        window.adsbygoogle = window.adsbygoogle || [];
+        window.adsbygoogle.push({});
+        adPushedRef.current = true;
+      } catch (err) {
+        console.warn('AdSense non pronto:', err);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [slot]);
+
+  return (
+    <section className={`ad-card ${compact ? 'ad-card-compact' : ''}`}>
+      <div className="ad-card-label">Sponsorizzato</div>
+
+      <ins
+        className="adsbygoogle ad-ins"
+        style={{ display: 'block' }}
+        data-ad-client={ADSENSE_CLIENT}
+        data-ad-slot={slot}
+        data-ad-format="auto"
+        data-full-width-responsive="true"
+      />
+    </section>
+  );
+}
 
 export default function App() {
   const [step, setStep] = useState(0);
@@ -865,6 +901,8 @@ const preparazioneAttiva =
 
   {errore && <div className="error-box">{errore}</div>}
 </div>
+
+        <AdCard slot={ADSENSE_SLOT_RESULTS} />
 
         <div className="risultato">
           <section>
