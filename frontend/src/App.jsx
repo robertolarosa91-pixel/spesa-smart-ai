@@ -226,7 +226,10 @@ async function esci() {
     setUtente(null);
     setRicetteSalvate([]);
     setMostraSalvate(false);
+    setMostraCronologia(false);
+    setRisultato(null);
     setErrore(null);
+    setStep(0);
   } catch (err) {
     console.error('Errore logout:', err);
     setErrore('Errore durante l’uscita dall’account.');
@@ -447,9 +450,11 @@ function apriRicettaSalvata(ricetta) {
   });
 
   setMostraSalvate(false);
+  setMostraCronologia(false);
   setRicettaSelezionata(0);
   setPaginaRicette(0);
   setProdottiAcquistati({});
+  scrollInAlto();
 }
 
 function renderAccountArea() {
@@ -944,6 +949,7 @@ setProdottiAcquistati({});
   throw new Error(data.details || data.error || 'Errore sconosciuto');
 }
 
+      salvaInCronologia(data);
       setRisultato(data);
       scrollInAlto();
     } catch (err) {
