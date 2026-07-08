@@ -46,69 +46,8 @@ const ADSENSE_CLIENT = import.meta.env.VITE_ADSENSE_CLIENT || '';
 const ADSENSE_SLOT_RESULTS = import.meta.env.VITE_ADSENSE_SLOT_RESULTS || '';
 const ADSENSE_SLOT_BREAK = import.meta.env.VITE_ADSENSE_SLOT_BREAK || '';
 
-const STEPS = ['Budget', 'Chi mangia', 'Negozio', 'Gusti', 'Riepilogo'];
+const STEPS = ['Chi mangia', 'Negozio', 'Gusti', 'Riepilogo'];
 
-function AdCard({ slot, compact = false }) {
-  const demoAds = new URLSearchParams(window.location.search).get('demoAds') === '1';
-
-  useEffect(() => {
-    if (demoAds) return;
-    if (!ADSENSE_CLIENT || !slot) return;
-
-    const timer = setTimeout(() => {
-      try {
-        window.adsbygoogle = window.adsbygoogle || [];
-        window.adsbygoogle.push({});
-      } catch (err) {
-        console.warn('AdSense non pronto:', err);
-      }
-    }, 150);
-
-    return () => clearTimeout(timer);
-  }, [slot, demoAds]);
-
-  return (
-    <section className={`ad-card ${compact ? 'ad-card-compact' : ''}`}>
-      <div className="ad-card-label">
-        {demoAds ? 'Demo AdSense' : 'Sponsorizzato'}
-      </div>
-
-      {demoAds ? (
-        <div className={`ad-demo-box ${compact ? 'ad-demo-box-compact' : ''}`}>
-          <div className="ad-demo-icon">🛒</div>
-
-          <div className="ad-demo-text">
-            <strong>
-              {compact ? 'Pausa sponsorizzata demo' : 'Annuncio demo risultati'}
-            </strong>
-            <span>
-              Qui comparirà il banner AdSense reale
-            </span>
-          </div>
-
-          <div className="ad-demo-badge">
-            DEMO
-          </div>
-        </div>
-      ) : ADSENSE_CLIENT && slot ? (
-        <ins
-          className="adsbygoogle ad-ins"
-          style={{ display: 'block' }}
-          data-ad-client={ADSENSE_CLIENT}
-          data-ad-slot={slot}
-          data-ad-format="auto"
-          data-full-width-responsive="true"
-        />
-      ) : (
-        <div className="ad-placeholder">
-          <span>🛍️</span>
-          <strong>Spazio pubblicitario</strong>
-          <small>Qui comparirà il banner quando colleghi AdSense</small>
-        </div>
-      )}
-    </section>
-  );
-}
 export default function App() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
@@ -131,11 +70,6 @@ const [ricetteSalvate, setRicetteSalvate] = useState([]);
 const [mostraSalvate, setMostraSalvate] = useState(false);
 const [cronologia, setCronologia] = useState([]);
 
-const [mostraAdBreak, setMostraAdBreak] = useState(false);
-const [azioneDopoAd, setAzioneDopoAd] = useState(null);
-const [adCountdown, setAdCountdown] = useState(3);
-const adMostrataPrimaDiGenerareRef = useRef(false);
-
 useEffect(() => {
   const unsubscribe = onAuthStateChanged(auth, (user) => {
     setUtente(user);
@@ -155,25 +89,6 @@ useEffect(() => {
 
   caricaRicetteSalvate();
 }, [utente]);
-
-useEffect(() => {
-  if (!mostraAdBreak) return;
-
-  setAdCountdown(3);
-
-  const interval = setInterval(() => {
-    setAdCountdown(prev => {
-      if (prev <= 1) {
-        clearInterval(interval);
-        return 0;
-      }
-
-      return prev - 1;
-    });
-  }, 1000);
-
-  return () => clearInterval(interval);
-}, [mostraAdBreak]);
 
 
 async function accedi() {
@@ -523,72 +438,6 @@ function renderLoadingOverlay() {
   );
 }
 
-function getAdCounterKey() {
-  return utente ? `ad_generazioni_${utente.uid}` : 'ad_generazioni_ospite';
-}
-
-function registraGenerazioneEControllaAd() {
-  try {
-    const key = getAdCounterKey();
-    const valoreAttuale = Number(localStorage.getItem(key) || '0');
-    const nuovoValore = valoreAttuale + 1;
-
-    localStorage.setItem(key, String(nuovoValore));
-
-    return nuovoValore % 3 === 0;
-  } catch {
-    return false;
-  }
-}
-
-function apriAdBreak(azione = null) {
-  setAdCountdown(3);
-  setAzioneDopoAd(() => azione);
-  setMostraAdBreak(true);
-}
-
-function chiudiAdBreak() {
-  if (adCountdown > 0) return;
-
-  const azione = azioneDopoAd;
-
-  setMostraAdBreak(false);
-  setAzioneDopoAd(null);
-
-  if (typeof azione === 'function') {
-    setTimeout(() => {
-      azione();
-    }, 180);
-  }
-}
-
-function dopoGenerazioneCompletata() {
-  const deveMostrareAd = registraGenerazioneEControllaAd();
-
-  if (adMostrataPrimaDiGenerareRef.current) {
-    adMostrataPrimaDiGenerareRef.current = false;
-    return;
-  }
-
-  if (deveMostrareAd) {
-    setTimeout(() => {
-      apriAdBreak();
-    }, 650);
-  }
-}
-
-function generaAltreRicetteConAd() {
-  apriAdBreak(() => {
-    adMostrataPrimaDiGenerareRef.current = true;
-
-    Promise.resolve(generaAltreRicette()).finally(() => {
-      setTimeout(() => {
-        adMostrataPrimaDiGenerareRef.current = false;
-      }, 1200);
-    });
-  });
-}
-
 function getHistoryKey() {
   return utente ? `cronologia_spesa_${utente.uid}` : 'cronologia_spesa_ospite';
 }
@@ -778,35 +627,6 @@ Preparata con Spesa Smart AI ✨`;
   window.open(`https://wa.me/?text=${encodeURIComponent(testo)}`, '_blank', 'noopener,noreferrer');
 }
 
-function renderAdBreakOverlay() {
-  if (!mostraAdBreak) return null;
-
-  return (
-    <div className="ad-break-overlay">
-      <div className="ad-break-card">
-        <div className="ad-break-top">
-          <span>🛒</span>
-          <div>
-            <strong>Pausa sponsorizzata</strong>
-            <small>Grazie, ci aiuti a mantenere Spesa Smart AI gratuita</small>
-          </div>
-        </div>
-
-        <AdCard slot={ADSENSE_SLOT_BREAK} compact />
-
-        <button
-          type="button"
-          className="ad-continue-btn"
-          onClick={chiudiAdBreak}
-          disabled={adCountdown > 0}
-        >
-          {adCountdown > 0 ? `Continua tra ${adCountdown}s` : 'Continua'}
-        </button>
-      </div>
-    </div>
-  );
-}
-
 const [paginaRicette, setPaginaRicette] = useState(0);
 const [prodottiAcquistati, setProdottiAcquistati] = useState({});
 
@@ -910,8 +730,7 @@ async function generaAltreRicette() {
 }
 
     salvaInCronologia(data);
-setRisultato(data);
-dopoGenerazioneCompletata();
+    setRisultato(data);
   } catch (err) {
     setErrore(err.message);
   } finally {
@@ -935,7 +754,6 @@ if (mostraSalvate) {
     <div className="page">
       {renderAccountArea()}
       {renderLoadingOverlay()}
-{renderAdBreakOverlay()}
 
       <div className="saved-page fade-in">
         <h1>Ricette salvate</h1>
@@ -1025,7 +843,7 @@ const preparazioneAttiva =
 </div>
 
 <div className="result-actions">
-  <button className="submit-btn" onClick={generaAltreRicetteConAd} disabled={loading || retrySeconds > 0}>
+  <button className="submit-btn" onClick={generaAltreRicette} disabled={loading || retrySeconds > 0}>
     {loading
       ? 'Genero nuove ricette...'
       : retrySeconds > 0
@@ -1048,9 +866,7 @@ const preparazioneAttiva =
   {errore && <div className="error-box">{errore}</div>}
 </div>
 
-        <AdCard slot={ADSENSE_SLOT_RESULTS} />
-
-<div className="risultato">
+        <div className="risultato">
           <section>
             <h2>Ricette</h2>
             {ricetteVisibili.map((r, indexLocale) => {
