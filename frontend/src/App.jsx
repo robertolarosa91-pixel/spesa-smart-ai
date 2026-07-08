@@ -81,6 +81,7 @@ useEffect(() => {
   caricaRicetteSalvate();
 }, [utente]);
 
+
 async function accedi() {
   try {
     setErrore(null);
@@ -121,55 +122,28 @@ async function esci() {
   }
 }
 
-function toggleMostraSalvate(event) {
+function vaiHome(event) {
   event?.preventDefault();
   event?.stopPropagation();
 
-  setMostraSalvate(prev => !prev);
+  setMostraSalvate(false);
+  setRisultato(null);
+  setRicettaSelezionata(0);
+  setPaginaRicette(0);
+  setProdottiAcquistati({});
+  setErrore(null);
+  setStep(0);
+}
+
+function vaiSalvate(event) {
+  event?.preventDefault();
+  event?.stopPropagation();
+
+  setMostraSalvate(true);
 }
 
 function getStorageKey() {
   return utente ? `ricette_salvate_${utente.uid}` : 'ricette_salvate_ospite';
-}
-
-async function accedi() {
-  try {
-    setErrore(null);
-
-    await setPersistence(auth, browserLocalPersistence);
-
-    await signInWithPopup(auth, googleProvider);
-  } catch (err) {
-    console.error('Errore login Google:', err);
-
-    if (
-      err.code === 'auth/popup-blocked' ||
-      err.code === 'auth/cancelled-popup-request' ||
-      err.code === 'auth/popup-closed-by-user'
-    ) {
-      try {
-        await signInWithRedirect(auth, googleProvider);
-        return;
-      } catch (redirectErr) {
-        console.error('Errore redirect Google:', redirectErr);
-      }
-    }
-
-    setErrore('Accesso Google non riuscito. Riprova.');
-  }
-}
-
-async function esci() {
-  try {
-    await signOut(auth);
-    setUtente(null);
-    setRicetteSalvate([]);
-    setMostraSalvate(false);
-    setErrore(null);
-  } catch (err) {
-    console.error('Errore logout:', err);
-    setErrore('Errore durante l’uscita dall’account.');
-  }
 }
 
 function idRicettaFirestore(ricetta) {
@@ -344,75 +318,45 @@ function apriRicettaSalvata(ricetta) {
 
 function renderAccountArea() {
   return (
-    <>
-      <div className="auth-bar">
-        {utente ? (
-          <>
-            <span className="auth-user">
-              Ciao, {utente.displayName?.split(' ')[0]}
-            </span>
+    <div className="auth-bar">
+      {utente ? (
+        <>
+          <span className="auth-user">
+            Ciao, {utente.displayName?.split(' ')[0]}
+          </span>
 
+          {mostraSalvate && (
             <button
               type="button"
-              className={`auth-btn ${mostraSalvate ? 'auth-btn-active' : ''}`}
-              onClick={toggleMostraSalvate}
+              className="auth-btn auth-home-btn"
+              onClick={vaiHome}
             >
-              ❤️ Salvate ({ricetteSalvate.length})
+              🏠 Home
             </button>
-
-            <button
-              type="button"
-              className="auth-btn auth-btn-secondary"
-              onClick={esci}
-            >
-              Esci
-            </button>
-          </>
-        ) : (
-          <button type="button" className="auth-btn" onClick={accedi}>
-            Accedi con Google
-          </button>
-        )}
-      </div>
-
-      {utente && mostraSalvate && (
-        <div className="saved-panel fade-in">
-          <h2>Ricette salvate</h2>
-
-          {ricetteSalvate.length === 0 ? (
-            <p className="saved-empty">Non hai ancora salvato ricette.</p>
-          ) : (
-            <div className="saved-list">
-              {ricetteSalvate.map((r) => (
-                <div key={r.id} className="saved-card">
-                  <div className="saved-card-text">
-                    <strong>{r.nome}</strong>
-                    <p>{r.descrizione_breve}</p>
-                  </div>
-
-                  <div className="saved-actions">
-                    <button
-                      type="button"
-                      onClick={() => apriRicettaSalvata(r)}
-                    >
-                      Apri
-                    </button>
-
-                    <button
-                      type="button"
-                      className="remove-saved-btn"
-                      onClick={() => rimuoviRicettaSalvata(r.id)}
-                    >
-                      Rimuovi
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
           )}
-        </div>
+
+          <button
+            type="button"
+            className={`auth-btn ${mostraSalvate ? 'auth-btn-active' : ''}`}
+            onClick={vaiSalvate}
+          >
+            ❤️ Salvate ({ricetteSalvate.length})
+          </button>
+
+          <button
+            type="button"
+            className="auth-btn auth-btn-secondary"
+            onClick={esci}
+          >
+            Esci
+          </button>
+        </>
+      ) : (
+        <button type="button" className="auth-btn" onClick={accedi}>
+          Accedi con Google
+        </button>
       )}
-    </>
+    </div>
   );
 }
 const [paginaRicette, setPaginaRicette] = useState(0);
@@ -533,9 +477,54 @@ async function generaAltreRicette() {
   setErrore(null);
   setRetrySeconds(0);
   setStep(0);
+  setMostraSalvate(false);
 }
 
-  if (risultato) {
+if (mostraSalvate) {
+  return (
+    <div className="page">
+      {renderAccountArea()}
+
+      <div className="saved-page fade-in">
+        <h1>Ricette salvate</h1>
+
+        {ricetteSalvate.length === 0 ? (
+          <p className="saved-empty">Non hai ancora salvato ricette.</p>
+        ) : (
+          <div className="saved-list">
+            {ricetteSalvate.map((r) => (
+              <div key={r.id} className="saved-card">
+                <div className="saved-card-text">
+                  <strong>{r.nome}</strong>
+                  <p>{r.descrizione_breve}</p>
+                </div>
+
+                <div className="saved-actions">
+                  <button
+                    type="button"
+                    onClick={() => apriRicettaSalvata(r)}
+                  >
+                    Apri
+                  </button>
+
+                  <button
+                    type="button"
+                    className="remove-saved-btn"
+                    onClick={() => rimuoviRicettaSalvata(r.id)}
+                  >
+                    Rimuovi
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+if (risultato) {
   const RICETTE_PER_PAGINA = 2;
   const ricette = risultato.ricette || [];
   const totalePagineRicette = Math.ceil(ricette.length / RICETTE_PER_PAGINA);
