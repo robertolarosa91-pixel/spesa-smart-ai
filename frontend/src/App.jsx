@@ -79,11 +79,8 @@ useEffect(() => {
   caricaRicetteSalvate();
 }, [utente]);
 
-async function caricaRicetteSalvate() {
-  if (!utente) return;
-  const snapshot = await getDocs(collection(db, 'utenti', utente.uid, 'ricette_salvate'));
-  const ricette = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-  setRicetteSalvate(ricette);
+function getStorageKey() {
+  return utente ? `ricette_salvate_${utente.uid}` : 'ricette_salvate_ospite';
 }
 
 async function accedi() {
@@ -96,7 +93,11 @@ async function accedi() {
   } catch (err) {
     console.error('Errore login Google:', err);
 
-    if (err.code === 'auth/popup-blocked' || err.code === 'auth/cancelled-popup-request') {
+    if (
+      err.code === 'auth/popup-blocked' ||
+      err.code === 'auth/cancelled-popup-request' ||
+      err.code === 'auth/popup-closed-by-user'
+    ) {
       try {
         await signInWithRedirect(auth, googleProvider);
         return;
@@ -110,19 +111,97 @@ async function accedi() {
 }
 
 async function esci() {
-  await signOut(auth);
-  setMostraSalvate(false);
+  try {
+    await signOut(auth);
+    setUtente(null);
+    setRicetteSalvate([]);
+    setMostraSalvate(false);
+    setErrore(null);
+  } catch (err) {
+    console.error('Errore logout:', err);
+    setErrore('Errore durante l’uscita dall’account.');
+  }
 }
 
 function idRicettaFirestore(ricetta) {
-  const id = String(ricetta?.nome || 'ricetta')
+  return String(ricetta?.nome || 'ricetta')
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '_')
     .replace(/^_+|_+$/g, '');
+}
 
-  return id || 'ricetta';
+function pulisciPerFirestore(value) {
+  if (value === undefined) return null;
+  if (typeof value === 'number' && !Number.isFinite(value)) return null;
+
+  if (Array.isArray(value)) {
+    return value.map(pulisciPerFirestore);
+  }
+
+  if (value && typeof value === 'object') {
+    const obj = {};
+
+    Object.entries(value).forEach(([key, val]) => {
+      obj[key] = pulisciPerFirestore(val);
+    });
+
+    return obj;
+  }
+
+  return value;
+}
+
+function salvaRicetteLocali(lista) {
+  try {
+    localStorage.setItem(getStorageKey(), JSON.stringify(lista));
+  } catch (err) {
+    console.warn('Errore salvataggio locale:', err);
+  }
+}
+
+function caricaRicetteLocali() {
+  try {
+    const raw = localStorage.getItem(getStorageKey());
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+async function caricaRicetteSalvate() {
+  if (!utente) {
+    setRicetteSalvate([]);
+    return;
+  }
+
+  const locali = caricaRicetteLocali();
+
+  try {
+    const snapshot = await getDocs(
+      collection(db, 'utenti', utente.uid, 'ricette_salvate')
+    );
+
+    const ricetteCloud = snapshot.docs.map(d => ({
+      id: d.id,
+      ...d.data()
+    }));
+
+    const unite = [...ricetteCloud];
+
+    locali.forEach(r => {
+      if (!unite.some(x => x.id === r.id)) {
+        unite.push(r);
+      }
+    });
+
+    setRicetteSalvate(unite);
+    salvaRicetteLocali(unite);
+  } catch (err) {
+    console.warn('Firestore non disponibile, uso salvataggio locale:', err.code, err.message);
+    setRicetteSalvate(locali);
+  }
 }
 
 async function salvaRicetta(ricetta) {
@@ -131,57 +210,54 @@ async function salvaRicetta(ricetta) {
     return;
   }
 
+  const idRicetta = idRicettaFirestore(ricetta);
+
+  const ricettaPulita = pulisciPerFirestore({
+    ...ricetta,
+    id: idRicetta,
+    salvata_il: new Date().toISOString()
+  });
+
+  const nuovaLista = [
+    { id: idRicetta, ...ricettaPulita },
+    ...ricetteSalvate.filter(r => r.id !== idRicetta)
+  ];
+
+  setRicetteSalvate(nuovaLista);
+  salvaRicetteLocali(nuovaLista);
+  setErrore(null);
+
   try {
-    setErrore(null);
-
-    const idRicetta = idRicettaFirestore(ricetta);
-
-    const ricettaPulita = JSON.parse(JSON.stringify({
-      ...ricetta,
-      salvata_il: new Date().toISOString()
-    }));
-
-    setRicetteSalvate(prev => {
-      if (prev.some(r => r.id === idRicetta)) return prev;
-      return [{ id: idRicetta, ...ricettaPulita }, ...prev];
-    });
-
     await setDoc(
       doc(db, 'utenti', utente.uid, 'ricette_salvate', idRicetta),
       ricettaPulita,
       { merge: true }
     );
-
-    await caricaRicetteSalvate();
   } catch (err) {
-    console.error('Errore salvataggio ricetta:', err);
-    setErrore('Non sono riuscito a salvare la ricetta.');
-    await caricaRicetteSalvate();
+    console.warn('Ricetta salvata solo in locale. Errore Firestore:', err.code, err.message);
   }
 }
 
 async function rimuoviRicettaSalvata(ricettaOId) {
   if (!utente) return;
 
+  const idRicetta =
+    typeof ricettaOId === 'string'
+      ? ricettaOId
+      : idRicettaFirestore(ricettaOId);
+
+  const nuovaLista = ricetteSalvate.filter(r => r.id !== idRicetta);
+
+  setRicetteSalvate(nuovaLista);
+  salvaRicetteLocali(nuovaLista);
+  setErrore(null);
+
   try {
-    setErrore(null);
-
-    const idRicetta =
-      typeof ricettaOId === 'string'
-        ? ricettaOId
-        : idRicettaFirestore(ricettaOId);
-
-    setRicetteSalvate(prev => prev.filter(r => r.id !== idRicetta));
-
     await deleteDoc(
       doc(db, 'utenti', utente.uid, 'ricette_salvate', idRicetta)
     );
-
-    await caricaRicetteSalvate();
   } catch (err) {
-    console.error('Errore rimozione ricetta:', err);
-    setErrore('Non sono riuscito a rimuovere la ricetta salvata.');
-    await caricaRicetteSalvate();
+    console.warn('Rimozione solo locale. Errore Firestore:', err.code, err.message);
   }
 }
 
@@ -203,6 +279,94 @@ async function togglePreferito(ricetta, event) {
   } else {
     await salvaRicetta(ricetta);
   }
+}
+
+function apriRicettaSalvata(ricetta) {
+  setRisultato({
+    ricette: [ricetta],
+    note: 'Ricetta salvata nei preferiti.'
+  });
+
+  setMostraSalvate(false);
+  setRicettaSelezionata(0);
+  setPaginaRicette(0);
+  setProdottiAcquistati({});
+}
+
+function renderAuthBar() {
+  return (
+    <div className="auth-bar">
+      {utente ? (
+        <>
+          <span className="auth-user">
+            Ciao, {utente.displayName?.split(' ')[0]}
+          </span>
+
+          <button
+            type="button"
+            className="auth-btn"
+            onClick={() => setMostraSalvate(m => !m)}
+          >
+            ❤️ Salvate ({ricetteSalvate.length})
+          </button>
+
+          <button
+            type="button"
+            className="auth-btn auth-btn-secondary"
+            onClick={esci}
+          >
+            Esci
+          </button>
+        </>
+      ) : (
+        <button type="button" className="auth-btn" onClick={accedi}>
+          Accedi con Google
+        </button>
+      )}
+    </div>
+  );
+}
+
+function renderSalvatePanel() {
+  if (!utente || !mostraSalvate) return null;
+
+  return (
+    <div className="saved-panel fade-in">
+      <h2>Ricette salvate</h2>
+
+      {ricetteSalvate.length === 0 ? (
+        <p className="saved-empty">Non hai ancora salvato ricette.</p>
+      ) : (
+        <div className="saved-list">
+          {ricetteSalvate.map((r) => (
+            <div key={r.id} className="saved-card">
+              <div className="saved-card-text">
+                <strong>{r.nome}</strong>
+                <p>{r.descrizione_breve}</p>
+              </div>
+
+              <div className="saved-actions">
+                <button
+                  type="button"
+                  onClick={() => apriRicettaSalvata(r)}
+                >
+                  Apri
+                </button>
+
+                <button
+                  type="button"
+                  className="remove-saved-btn"
+                  onClick={() => rimuoviRicettaSalvata(r.id)}
+                >
+                  Rimuovi
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 const [paginaRicette, setPaginaRicette] = useState(0);
 const [prodottiAcquistati, setProdottiAcquistati] = useState({});
@@ -343,19 +507,8 @@ const preparazioneAttiva =
 
   return (
   <div className="page">
-    <div className="auth-bar">
-      {utente ? (
-        <>
-          <span className="auth-user">Ciao, {utente.displayName?.split(' ')[0]}</span>
-          <button type="button" className="auth-btn" onClick={() => setMostraSalvate(m => !m)}>
-            ❤️ Salvate ({ricetteSalvate.length})
-          </button>
-          <button type="button" className="auth-btn auth-btn-secondary" onClick={esci}>Esci</button>
-        </>
-      ) : (
-        <button type="button" className="auth-btn" onClick={accedi}>Accedi con Google</button>
-      )}
-    </div>
+    {renderAuthBar()}
+    {renderSalvatePanel()}
 
     <div className="result-hero">
   <span className="eyebrow">Ecco cosa ti serve</span>
@@ -558,19 +711,8 @@ const preparazioneAttiva =
 
   return (
     <div className="page">
-      <div className="auth-bar">
-        {utente ? (
-          <>
-            <span className="auth-user">Ciao, {utente.displayName?.split(' ')[0]}</span>
-            <button type="button" className="auth-btn" onClick={() => setMostraSalvate(m => !m)}>
-              ❤️ Salvate ({ricetteSalvate.length})
-            </button>
-            <button type="button" className="auth-btn auth-btn-secondary" onClick={esci}>Esci</button>
-          </>
-        ) : (
-          <button type="button" className="auth-btn" onClick={accedi}>Accedi con Google</button>
-        )}
-      </div>
+      {renderAuthBar()}
+      {renderSalvatePanel()}
 
       <div className="progress-track">
         {STEPS.map((label, i) => (
