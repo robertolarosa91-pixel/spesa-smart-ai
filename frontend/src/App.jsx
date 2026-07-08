@@ -74,10 +74,59 @@ useEffect(() => {
 useEffect(() => {
   if (!utente) {
     setRicetteSalvate([]);
+    setMostraSalvate(false);
     return;
   }
+
   caricaRicetteSalvate();
 }, [utente]);
+
+async function accedi() {
+  try {
+    setErrore(null);
+
+    await setPersistence(auth, browserLocalPersistence);
+
+    await signInWithPopup(auth, googleProvider);
+  } catch (err) {
+    console.error('Errore login Google:', err);
+
+    if (
+      err.code === 'auth/popup-blocked' ||
+      err.code === 'auth/cancelled-popup-request' ||
+      err.code === 'auth/popup-closed-by-user'
+    ) {
+      try {
+        await signInWithRedirect(auth, googleProvider);
+        return;
+      } catch (redirectErr) {
+        console.error('Errore redirect Google:', redirectErr);
+      }
+    }
+
+    setErrore('Accesso Google non riuscito. Riprova.');
+  }
+}
+
+async function esci() {
+  try {
+    await signOut(auth);
+    setUtente(null);
+    setRicetteSalvate([]);
+    setMostraSalvate(false);
+    setErrore(null);
+  } catch (err) {
+    console.error('Errore logout:', err);
+    setErrore('Errore durante l’uscita dall’account.');
+  }
+}
+
+function toggleMostraSalvate(event) {
+  event?.preventDefault();
+  event?.stopPropagation();
+
+  setMostraSalvate(prev => !prev);
+}
 
 function getStorageKey() {
   return utente ? `ricette_salvate_${utente.uid}` : 'ricette_salvate_ospite';
@@ -293,79 +342,77 @@ function apriRicettaSalvata(ricetta) {
   setProdottiAcquistati({});
 }
 
-function renderAuthBar() {
+function renderAccountArea() {
   return (
-    <div className="auth-bar">
-      {utente ? (
-        <>
-          <span className="auth-user">
-            Ciao, {utente.displayName?.split(' ')[0]}
-          </span>
+    <>
+      <div className="auth-bar">
+        {utente ? (
+          <>
+            <span className="auth-user">
+              Ciao, {utente.displayName?.split(' ')[0]}
+            </span>
 
-          <button
-            type="button"
-            className="auth-btn"
-            onClick={() => setMostraSalvate(m => !m)}
-          >
-            ❤️ Salvate ({ricetteSalvate.length})
+            <button
+              type="button"
+              className={`auth-btn ${mostraSalvate ? 'auth-btn-active' : ''}`}
+              onClick={toggleMostraSalvate}
+            >
+              ❤️ Salvate ({ricetteSalvate.length})
+            </button>
+
+            <button
+              type="button"
+              className="auth-btn auth-btn-secondary"
+              onClick={esci}
+            >
+              Esci
+            </button>
+          </>
+        ) : (
+          <button type="button" className="auth-btn" onClick={accedi}>
+            Accedi con Google
           </button>
+        )}
+      </div>
 
-          <button
-            type="button"
-            className="auth-btn auth-btn-secondary"
-            onClick={esci}
-          >
-            Esci
-          </button>
-        </>
-      ) : (
-        <button type="button" className="auth-btn" onClick={accedi}>
-          Accedi con Google
-        </button>
-      )}
-    </div>
-  );
-}
+      {utente && mostraSalvate && (
+        <div className="saved-panel fade-in">
+          <h2>Ricette salvate</h2>
 
-function renderSalvatePanel() {
-  if (!utente || !mostraSalvate) return null;
+          {ricetteSalvate.length === 0 ? (
+            <p className="saved-empty">Non hai ancora salvato ricette.</p>
+          ) : (
+            <div className="saved-list">
+              {ricetteSalvate.map((r) => (
+                <div key={r.id} className="saved-card">
+                  <div className="saved-card-text">
+                    <strong>{r.nome}</strong>
+                    <p>{r.descrizione_breve}</p>
+                  </div>
 
-  return (
-    <div className="saved-panel fade-in">
-      <h2>Ricette salvate</h2>
+                  <div className="saved-actions">
+                    <button
+                      type="button"
+                      onClick={() => apriRicettaSalvata(r)}
+                    >
+                      Apri
+                    </button>
 
-      {ricetteSalvate.length === 0 ? (
-        <p className="saved-empty">Non hai ancora salvato ricette.</p>
-      ) : (
-        <div className="saved-list">
-          {ricetteSalvate.map((r) => (
-            <div key={r.id} className="saved-card">
-              <div className="saved-card-text">
-                <strong>{r.nome}</strong>
-                <p>{r.descrizione_breve}</p>
-              </div>
-
-              <div className="saved-actions">
-                <button
-                  type="button"
-                  onClick={() => apriRicettaSalvata(r)}
-                >
-                  Apri
-                </button>
-
-                <button
-                  type="button"
-                  className="remove-saved-btn"
-                  onClick={() => rimuoviRicettaSalvata(r.id)}
-                >
-                  Rimuovi
-                </button>
-              </div>
+                    <button
+                      type="button"
+                      className="remove-saved-btn"
+                      onClick={() => rimuoviRicettaSalvata(r.id)}
+                    >
+                      Rimuovi
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
+          )}
         </div>
       )}
-    </div>
+    </>
   );
 }
 const [paginaRicette, setPaginaRicette] = useState(0);
@@ -507,8 +554,7 @@ const preparazioneAttiva =
 
   return (
   <div className="page">
-    {renderAuthBar()}
-    {renderSalvatePanel()}
+    {renderAccountArea()}
 
     <div className="result-hero">
   <span className="eyebrow">Ecco cosa ti serve</span>
@@ -711,8 +757,7 @@ const preparazioneAttiva =
 
   return (
     <div className="page">
-      {renderAuthBar()}
-      {renderSalvatePanel()}
+      {renderAccountArea()}
 
       <div className="progress-track">
         {STEPS.map((label, i) => (
