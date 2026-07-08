@@ -479,7 +479,7 @@ const PICCANTEZZA_DESCRIZIONI = {
   alta: 'molto piccante, marcatamente speziato'
 };
 
-function buildPrompt({ persone, pasto, preferenze, intolleranze, vegano, supermercato, ricette_da_evitare, piccantezza }) {
+function buildPrompt({ persone, pasto, preferenze, intolleranze, vegano, supermercato, ricette_da_evitare, piccantezza, budget, ingredientiCasa }) {
 
   const profilo = SUPERMARKET_PROFILES[supermercato?.toLowerCase()] || 'supermercato generico italiano';
   const descrizionePasto = PASTO_DESCRIZIONI[pasto?.toLowerCase()] || pasto;
@@ -487,10 +487,16 @@ function buildPrompt({ persone, pasto, preferenze, intolleranze, vegano, superme
   const ricetteDaEvitare = Array.isArray(ricette_da_evitare)
   ? ricette_da_evitare.filter(Boolean).join(', ')
   : '';
+
+  const budgetNumerico = Number(budget || 0);
+  const ingredientiGiaInCasa = ingredientiCasa || '';
+
   return `Sei un assistente esperto di spesa e cucina italiana. Devi proporre esattamente 3 ricette diverse, sintetiche e realistiche, rispettando rigorosamente questi vincoli.
 
 DATI:
 - Numero di persone: ${persone}
+- Budget indicativo per ogni ricetta/pasto: ${budgetNumerico > 0 ? `€${budgetNumerico}` : 'non indicato'}
+- Ingredienti già disponibili in casa: ${ingredientiGiaInCasa || 'nessuno'}
 - Tipo di pasto: ${descrizionePasto}
 - Livello di piccantezza desiderato: ${descrizionePiccantezza}
 - Supermercato: ${supermercato} (${profilo})
@@ -514,7 +520,11 @@ ISTRUZIONI:
 12. Se sono indicate ricette già proposte da evitare, non riproporle.
 13. Rispetta rigorosamente il tipo di pasto indicato: non proporre piatti salati da pranzo/cena se è richiesta colazione, merenda o dolce, e viceversa.
 14. Se è richiesto un livello di piccantezza, adattalo negli ingredienti (es. peperoncino, spezie piccanti) mantenendo la ricetta coerente con il tipo di pasto.
-15. Rispondi SOLO in JSON valido, senza testo fuori dal JSON. Non inserire virgole finali dopo l'ultimo elemento di array o oggetti.
+15. Il budget indicato NON è solo un massimo: è un obiettivo indicativo. Ogni ricetta deve cercare di avvicinarsi al budget, idealmente tra il 75% e il 105% del budget indicato. Se il budget è alto, non proporre ricette troppo economiche: usa ingredienti migliori, porzioni più complete, contorni, antipasti o prodotti premium coerenti con il pasto.
+16. Se l'utente indica ingredienti già disponibili in casa, usali quando sensato nella ricetta, ma NON inserirli nella lista_spesa da acquistare. Puoi citarli in "ingredienti_gia_in_casa_usati".
+17. Ogni prodotto della lista_spesa deve avere anche il campo "reparto". Usa solo questi reparti: "Frutta e verdura", "Carne e pesce", "Latticini e uova", "Dispensa", "Surgelati", "Panetteria", "Bevande", "Altro".
+18. Ogni ricetta deve avere "badge_qualita", array con massimo 4 elementi. Esempi: "💸 Economica", "⚡ Veloce", "🎯 Budget centrato", "🌱 Vegana", "🥗 Leggera", "🔥 Piccante", "👨‍👩‍👧 Famiglia".
+19. Rispondi SOLO in JSON valido, senza testo fuori dal JSON. Non inserire virgole finali dopo l'ultimo elemento di array o oggetti.
 
 Formato richiesto. Dentro "ricette" devi generare esattamente 3 oggetti come questo esempio:
 {
@@ -526,6 +536,8 @@ Formato richiesto. Dentro "ricette" devi generare esattamente 3 oggetti come que
       "tempo_preparazione_minuti": 25,
 "difficolta": "Facile",
 "emoji": "🍝",
+"badge_qualita": ["🎯 Budget centrato", "⚡ Veloce"],
+"ingredienti_gia_in_casa_usati": [],
 "preparazione_step_by_step": [
   "Passaggio pratico 1 specifico per questa ricetta.",
   "Passaggio pratico 2 specifico per questa ricetta.",
@@ -537,7 +549,8 @@ Formato richiesto. Dentro "ricette" devi generare esattamente 3 oggetti come que
         {
           "prodotto": "Gnocchi di patate",
           "quantita": "1 confezione",
-          "prezzo_stimato_euro": 1.49
+          "prezzo_stimato_euro": 1.49,
+          "reparto": "Dispensa"
         }
       ],
       "totale_stimato_euro": 8.50
@@ -770,7 +783,9 @@ function chiaveCache(body) {
     preferenze: body.preferenze,
     vegano: body.vegano,
     intolleranze: body.intolleranze,
-    piccantezza: body.piccantezza
+    piccantezza: body.piccantezza,
+    budget: body.budget,
+    ingredientiCasa: body.ingredientiCasa
   });
 }
 
