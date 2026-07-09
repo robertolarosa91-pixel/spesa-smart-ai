@@ -2241,3 +2241,49 @@ body::after {
   color: #ffffff;
   box-shadow: 0 10px 22px rgba(8, 123, 99, 0.22);
 }
+
+
+/* ─────────────────────────────────────────────
+   CERCA SUPERMERCATO
+───────────────────────────────────────────── */
+
+.market-search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 0.85rem 1rem;
+  box-shadow: 0 8px 20px rgba(55, 38, 20, 0.06);
+}
+
+.market-search-box span {
+  font-size: 1.1rem;
+}
+
+.market-search-box input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.market-search-box input::placeholder {
+  color: #9a8f80;
+  font-weight: 700;
+}
+
+.market-empty {
+  padding: 1rem;
+  border-radius: 20px;
+  background: #ffffff;
+  border: 1px dashed var(--line);
+  color: #6b6558;
+  font-weight: 800;
+  text-align: center;
+}
