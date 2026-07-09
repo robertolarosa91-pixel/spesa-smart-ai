@@ -177,7 +177,9 @@ export default function App() {
     intolleranze: [],
     piccantezza: 'nessuna',
     budget: 25,
-    ingredientiCasa: ''
+    ingredientiCasa: '',
+    modalitaSettimanale: false,
+    giorniPiano: 7
   });
   const [risultato, setRisultato] = useState(null);
 const [loading, setLoading] = useState(false);
@@ -189,6 +191,12 @@ const [mostraSalvate, setMostraSalvate] = useState(false);
 const [mostraCronologia, setMostraCronologia] = useState(false);
 const [cronologia, setCronologia] = useState([]);
 const [ricercaSupermercato, setRicercaSupermercato] = useState('');
+
+const supermercatiFiltrati = SUPERMERCATI.filter(s =>
+  s.label
+    .toLowerCase()
+    .includes(ricercaSupermercato.trim().toLowerCase())
+);
 
 const [mostraAdBreak, setMostraAdBreak] = useState(false);
 const [azioneDopoAd, setAzioneDopoAd] = useState(null);
@@ -1258,6 +1266,8 @@ const preparazioneAttiva =
     <span>{PASTI.find(p => p.id === form.pasto)?.label}</span>
     <span>{form.persone} {form.persone === 1 ? 'persona' : 'persone'}</span>
     <span>{SUPERMERCATI.find(s => s.id === form.supermercato)?.label}</span>
+    <span>€{Number(form.budget || 0).toFixed(0)}</span>
+    {form.modalitaSettimanale && <span>{form.giorniPiano} giorni</span>}
 
     {form.piccantezza !== 'nessuna' && <span>{LIVELLI_PICCANTEZZA.find(l => l.id === form.piccantezza)?.label}</span>}
     {form.vegano && <span>Vegano</span>}
@@ -1500,7 +1510,10 @@ const preparazioneAttiva =
 
             <div className="budget-smart-card">
               <div>
-                <span className="budget-label">Budget indicativo</span>
+                <span className="budget-label">
+                  {form.modalitaSettimanale ? 'Budget settimanale indicativo' : 'Budget indicativo'}
+                </span>
+
                 <strong>€{Number(form.budget || 0).toFixed(0)}</strong>
               </div>
 
@@ -1514,13 +1527,66 @@ const preparazioneAttiva =
 
                 <button
                   type="button"
-                  onClick={() => setForm(f => ({ ...f, budget: Math.min(200, Number(f.budget || 0) + 5) }))}
+                  onClick={() => setForm(f => ({ ...f, budget: Math.min(300, Number(f.budget || 0) + 5) }))}
                 >
                   +
                 </button>
               </div>
 
-              <p>Lo userò come obiettivo: se metti €100, cercherò ricette più vicine a quel valore, non da €10.</p>
+              <p>
+                {form.modalitaSettimanale
+                  ? `Userò questo budget per creare una spesa pensata per ${form.giorniPiano} giorni.`
+                  : 'Lo userò come obiettivo: se metti €100, cercherò ricette più vicine a quel valore, non da €10.'}
+              </p>
+            </div>
+
+            <div className="weekly-mode-card">
+              <div className="weekly-mode-head">
+                <div>
+                  <strong>🗓️ Spesa settimanale</strong>
+                  <span>Crea un piano più ampio, non solo un singolo pasto</span>
+                </div>
+
+                <button
+                  type="button"
+                  className={`weekly-switch ${form.modalitaSettimanale ? 'weekly-switch-active' : ''}`}
+                  onClick={() => setForm(f => ({
+                    ...f,
+                    modalitaSettimanale: !f.modalitaSettimanale,
+                    budget: !f.modalitaSettimanale ? Math.max(Number(f.budget || 0), 50) : 25
+                  }))}
+                >
+                  {form.modalitaSettimanale ? 'ON' : 'OFF'}
+                </button>
+              </div>
+
+              {form.modalitaSettimanale && (
+                <div className="weekly-days">
+                  <button
+                    type="button"
+                    className={form.giorniPiano === 3 ? 'weekly-day-active' : ''}
+                    onClick={() => setForm(f => ({ ...f, giorniPiano: 3 }))}
+                  >
+                    3 giorni
+                  </button>
+
+                  <button
+                    type="button"
+                    className={form.giorniPiano === 5 ? 'weekly-day-active' : ''}
+                    onClick={() => setForm(f => ({ ...f, giorniPiano: 5 }))}
+                  >
+                    5 giorni
+                  </button>
+
+                  <button
+                    type="button"
+                    className={form.giorniPiano === 7 ? 'weekly-day-active' : ''}
+                    onClick={() => setForm(f => ({ ...f, giorniPiano: 7 }))}
+                  >
+                    7 giorni
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="stepper">
@@ -1558,30 +1624,24 @@ const preparazioneAttiva =
               />
             </div>
 
-            <div className="market-grid">
-              {SUPERMERCATI
-                .filter(s =>
-                  s.label
-                    .toLowerCase()
-                    .includes(ricercaSupermercato.trim().toLowerCase())
-                )
-                .map(s => (
-                  <button
-                    type="button"
-                    key={s.id}
-                    className={`market-card ${form.supermercato === s.id ? 'market-active' : ''}`}
-                    onClick={() => setForm(f => ({ ...f, supermercato: s.id }))}
-                  >
-                    <span className="market-name">{s.label}</span>
-                  </button>
-                ))}
+            <div className="market-counter">
+              {supermercatiFiltrati.length} supermercati trovati
             </div>
 
-            {SUPERMERCATI.filter(s =>
-              s.label
-                .toLowerCase()
-                .includes(ricercaSupermercato.trim().toLowerCase())
-            ).length === 0 && (
+            <div className="market-grid">
+              {supermercatiFiltrati.map(s => (
+                <button
+                  type="button"
+                  key={s.id}
+                  className={`market-card ${form.supermercato === s.id ? 'market-active' : ''}`}
+                  onClick={() => setForm(f => ({ ...f, supermercato: s.id }))}
+                >
+                  <span className="market-name">{s.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {supermercatiFiltrati.length === 0 && (
               <div className="market-empty">
                 Nessun supermercato trovato.
               </div>
@@ -1658,6 +1718,13 @@ const preparazioneAttiva =
             <div className="summary-card">
               
               <div className="summary-row"><span>Persone</span><strong>{form.persone}</strong></div>
+              <div className="summary-row"><span>Budget</span><strong>€{Number(form.budget || 0).toFixed(0)}</strong></div>
+              {form.modalitaSettimanale && (
+                <div className="summary-row">
+                  <span>Modalità</span>
+                  <strong>Spesa per {form.giorniPiano} giorni</strong>
+                </div>
+              )}
               <div className="summary-row">
   <span>Pasto</span>
   <strong>{PASTI.find(p => p.id === form.pasto)?.label}</strong>
