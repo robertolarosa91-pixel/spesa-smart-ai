@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://spesa-smart-ai.vercel.app/sitemap.xml
+Sitemap: https://spesa-smart-ai.vercel.app/sitemap-pages.xml
