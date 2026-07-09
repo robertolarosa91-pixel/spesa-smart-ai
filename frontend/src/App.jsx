@@ -166,18 +166,6 @@ function FooterLinks() {
   );
 }
 
-function FooterLinks() {
-  return (
-    <nav className="footer-links" aria-label="Link informativi">
-      <a href="/come-funziona.html">Come funziona</a>
-      <a href="/faq.html">FAQ</a>
-      <a href="/privacy.html">Privacy</a>
-      <a href="/cookie.html">Cookie</a>
-      <a href="/contatti.html">Contatti</a>
-    </nav>
-  );
-}
-
 export default function App() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
