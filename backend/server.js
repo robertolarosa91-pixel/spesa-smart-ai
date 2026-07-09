@@ -439,28 +439,65 @@ function buildFallbackResponse(body) {
     ? body.ricette_da_evitare.map(normalizzaTesto)
     : [];
 
+  const isSettimanale =
+    body.modalitaSettimanale === true ||
+    body.modalitaSettimanale === 'true';
+
+  const giorniRichiesti = Number(body.giorniPiano || 3);
+  const giorni = [3, 5, 7].includes(giorniRichiesti) ? giorniRichiesti : 3;
+  const numeroRicette = isSettimanale ? giorni : 3;
+
   const ricette = FALLBACK_RICETTE
     .filter(r => !evitare.includes(normalizzaTesto(r.nome)))
     .filter(r => ricettaCompatibileFallback(r, body))
-    .slice(0, 3)
-    .map(({ tags, pasti, ...ricetta }) => ricetta);
+    .slice(0, numeroRicette)
+    .map(({ tags, pasti, ...ricetta }, index) => {
+      if (!isSettimanale) return ricetta;
+
+      return {
+        ...ricetta,
+        giorno_piano: index + 1,
+        nome: `Giorno ${index + 1} - ${ricetta.nome}`,
+        descrizione_breve: `Idea per il giorno ${index + 1}: ${ricetta.descrizione_breve}`
+      };
+    });
 
   const etichettaPasto = PASTO_LABEL_FALLBACK[body.pasto?.toLowerCase()] || 'la tua spesa';
 
   return {
     ricette,
-    note: `Ecco alcune idee per ${etichettaPasto}, mostrate perché il servizio è momentaneamente occupato. Prezzi stimati, controllare eventuali offerte.`
+    note: isSettimanale
+      ? `Ecco una spesa pensata per ${giorni} giorni, mostrata perché il servizio AI è momentaneamente occupato. Prezzi stimati, controllare eventuali offerte.`
+      : `Ecco alcune idee per ${etichettaPasto}, mostrate perché il servizio è momentaneamente occupato. Prezzi stimati, controllare eventuali offerte.`
   };
 }
-
 const SUPERMARKET_PROFILES = {
-  lidl: 'discount tedesco, marche proprie (Milbona, Vitasia, Alesto), buon rapporto qualita prezzo, prodotti freschi a rotazione settimanale',
-  eurospin: 'discount italiano, prezzi molto bassi, marche proprie, assortimento essenziale',
-  md: 'discount italiano diffuso soprattutto al sud, marche proprie MD, prezzi bassi',
-  esselunga: 'supermercato di fascia medio-alta, ampia scelta, marchio Esselunga, prodotti freschi e gastronomia',
-  conad: 'supermercato generalista, marchi Conad e Sapori&Idee, buona copertura nazionale',
-  coop: 'supermercato generalista con forte attenzione a bio e sostenibilita, marchio Coop',
-  carrefour: 'ipermercato generalista, marchio Carrefour, ampia scelta internazionale'
+  lidl: 'discount tedesco, marche proprie come Milbona, Italiamo, Vitasia, Alesto, buon rapporto qualita prezzo, prodotti freschi e offerte settimanali',
+  eurospin: 'discount italiano, prezzi molto bassi, marche proprie, assortimento essenziale, prodotti convenienti per spesa economica',
+  md: 'discount italiano, marche proprie MD, prezzi bassi, assortimento essenziale e prodotti freschi convenienti',
+  aldi: 'discount tedesco, prodotti semplici e convenienti, marche proprie, buona qualita prezzo',
+  penny: 'discount con offerte frequenti, prodotti economici, marche proprie e assortimento essenziale',
+  esselunga: 'supermercato di fascia medio-alta, ampia scelta, marchio Esselunga, prodotti freschi, gastronomia e prodotti premium',
+  conad: 'supermercato generalista, marchi Conad e Sapori&Idee, buona copertura nazionale, prodotti freschi e offerte locali',
+  coop: 'supermercato generalista con attenzione a bio, sostenibilita e prodotti a marchio Coop',
+  carrefour: 'ipermercato e supermercato generalista, marchio Carrefour, ampia scelta internazionale e prodotti freschi',
+  pam: 'supermercato generalista urbano, marchio Pam, buona scelta di prodotti freschi e confezionati',
+  bennet: 'ipermercato italiano, ampia scelta, prodotti freschi, banco gastronomia e offerte famiglia',
+  tigros: 'supermercato del nord Italia, buona qualita su fresco, carne, gastronomia e prodotti locali',
+  iper: 'ipermercato con ampia scelta, prodotti freschi, banco gastronomia, prodotti premium e offerte famiglia',
+  iperal: 'supermercato e ipermercato del nord Italia, buoni prodotti freschi, offerte e marchi propri',
+  famila: 'supermercato generalista, prodotti freschi, offerte settimanali e marchi del gruppo Selex',
+  despar: 'supermercato generalista, marchi Despar, prodotti freschi e buona presenza nel nord-est',
+  interspar: 'ipermercato Despar con assortimento ampio, prodotti freschi, gastronomia e offerte famiglia',
+  natura_si: 'supermercato biologico, prodotti naturali, bio, vegani e ingredienti di fascia piu alta',
+  crai: 'supermercato di prossimita, assortimento essenziale, prodotti locali e marchio Crai',
+  sigma: 'supermercato generalista di prossimita, prodotti freschi e offerte locali',
+  selex: 'gruppo supermercati generalisti, marchi Selex, prodotti convenienti e buona copertura nazionale',
+  todis: 'discount italiano, prezzi bassi, prodotti semplici e convenienti',
+  deco: 'supermercato diffuso soprattutto nel sud Italia, prodotti locali, offerte e marchi propri',
+  il_gigante: 'supermercato e ipermercato del nord Italia, buona scelta di fresco, gastronomia e offerte famiglia',
+  u2: 'supermercato urbano, assortimento pratico, prodotti freschi e spesa quotidiana',
+  dok: 'supermercato diffuso soprattutto nel sud Italia, prodotti freschi, offerte locali e marchi propri'
 };
 
 const PASTO_DESCRIZIONI = {
@@ -479,23 +516,67 @@ const PICCANTEZZA_DESCRIZIONI = {
   alta: 'molto piccante, marcatamente speziato'
 };
 
-function buildPrompt({ persone, pasto, preferenze, intolleranze, vegano, supermercato, ricette_da_evitare, piccantezza, budget, ingredientiCasa }) {
+function buildPrompt({
+  persone,
+  pasto,
+  preferenze,
+  intolleranze,
+  vegano,
+  supermercato,
+  ricette_da_evitare,
+  piccantezza,
+  budget,
+  ingredientiCasa,
+  modalitaSettimanale,
+  giorniPiano
+}) {
 
   const profilo = SUPERMARKET_PROFILES[supermercato?.toLowerCase()] || 'supermercato generico italiano';
   const descrizionePasto = PASTO_DESCRIZIONI[pasto?.toLowerCase()] || pasto;
   const descrizionePiccantezza = PICCANTEZZA_DESCRIZIONI[piccantezza?.toLowerCase()] || PICCANTEZZA_DESCRIZIONI.nessuna;
+
   const ricetteDaEvitare = Array.isArray(ricette_da_evitare)
-  ? ricette_da_evitare.filter(Boolean).join(', ')
-  : '';
+    ? ricette_da_evitare.filter(Boolean).join(', ')
+    : '';
 
   const budgetNumerico = Number(budget || 0);
   const ingredientiGiaInCasa = ingredientiCasa || '';
 
-  return `Sei un assistente esperto di spesa e cucina italiana. Devi proporre esattamente 3 ricette diverse, sintetiche e realistiche, rispettando rigorosamente questi vincoli.
+  const isSettimanale =
+    modalitaSettimanale === true ||
+    modalitaSettimanale === 'true';
+
+  const giorniRichiesti = Number(giorniPiano || 3);
+  const giorni = [3, 5, 7].includes(giorniRichiesti) ? giorniRichiesti : 3;
+  const numeroRicette = isSettimanale ? giorni : 3;
+
+  const istruzioniModalita = isSettimanale
+    ? `MODALITÀ SPESA SETTIMANALE:
+- Devi creare un piano per ${giorni} giorni.
+- Devi generare esattamente ${giorni} ricette, una per ogni giorno.
+- Ogni ricetta deve rappresentare il pasto selezionato per quel giorno.
+- Il nome di ogni ricetta deve iniziare con "Giorno 1 -", "Giorno 2 -", ecc.
+- Compila anche il campo "giorno_piano" con il numero del giorno.
+- Il budget indicato è il budget totale per tutti i ${giorni} giorni, non per ogni singola ricetta.
+- La somma dei "totale_stimato_euro" delle ricette deve avvicinarsi al budget totale indicato.
+- Idealmente la somma totale deve stare tra il 75% e il 105% del budget.
+- Distribuisci il budget in modo realistico tra i giorni.
+- Puoi riutilizzare ingredienti tra giorni diversi se è realistico.
+- Evita di proporre ${giorni} ricette troppo simili tra loro.
+- Crea varietà tra pasta, riso, carne, pesce, uova, legumi, verdure o alternative vegane quando compatibile.`
+    : `MODALITÀ SINGOLO PASTO:
+- Devi proporre esattamente 3 ricette diverse.
+- Il budget indicato è un obiettivo per ogni ricetta/pasto.
+- Ogni ricetta deve cercare di avvicinarsi al budget, idealmente tra il 75% e il 105% del budget indicato.`;
+
+  return `Sei un assistente esperto di spesa e cucina italiana. Devi proporre ricette sintetiche, realistiche e utili per fare la spesa, rispettando rigorosamente questi vincoli.
 
 DATI:
 - Numero di persone: ${persone}
-- Budget indicativo per ogni ricetta/pasto: ${budgetNumerico > 0 ? `€${budgetNumerico}` : 'non indicato'}
+- Modalità spesa settimanale: ${isSettimanale ? 'si' : 'no'}
+- Giorni del piano: ${isSettimanale ? giorni : 'non applicabile'}
+- Numero di ricette da generare: ${numeroRicette}
+- Budget indicativo: ${budgetNumerico > 0 ? `€${budgetNumerico}` : 'non indicato'}
 - Ingredienti già disponibili in casa: ${ingredientiGiaInCasa || 'nessuno'}
 - Tipo di pasto: ${descrizionePasto}
 - Livello di piccantezza desiderato: ${descrizionePiccantezza}
@@ -504,6 +585,8 @@ DATI:
 - Vegano: ${vegano ? 'si' : 'no'}
 - Intolleranze/allergie da evitare assolutamente: ${intolleranze || 'nessuna'}
 - Ricette già proposte da evitare: ${ricetteDaEvitare || 'nessuna'}
+
+${istruzioniModalita}
 
 ISTRUZIONI:
 1. Proponi prodotti realistici per il tipo di supermercato indicato.
@@ -526,11 +609,12 @@ ISTRUZIONI:
 18. Ogni ricetta deve avere "badge_qualita", array con massimo 4 elementi. Esempi: "💸 Economica", "⚡ Veloce", "🎯 Budget centrato", "🌱 Vegana", "🥗 Leggera", "🔥 Piccante", "👨‍👩‍👧 Famiglia".
 19. Rispondi SOLO in JSON valido, senza testo fuori dal JSON. Non inserire virgole finali dopo l'ultimo elemento di array o oggetti.
 
-Formato richiesto. Dentro "ricette" devi generare esattamente 3 oggetti come questo esempio:
+Formato richiesto. Dentro "ricette" devi generare esattamente ${numeroRicette} oggetti come questo esempio:
 {
   "ricette": [
     {
-      "nome": "Gnocchi alla sorrentina",
+      "giorno_piano": ${isSettimanale ? 1 : null},
+      "nome": "${isSettimanale ? 'Giorno 1 - Gnocchi alla sorrentina' : 'Gnocchi alla sorrentina'}",
       "nome_ricerca": "Gnocchi alla sorrentina",
       "descrizione_breve": "Gnocchi con sugo di pomodoro, mozzarella e basilico.",
       "tempo_preparazione_minuti": 25,
@@ -671,7 +755,7 @@ async function callGemini(prompt) {
   for (const model of GEMINI_MODELS) {
     for (let attempt = 1; attempt <= 3; attempt++) {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 20000);
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
       let response;
       try {
@@ -689,7 +773,7 @@ async function callGemini(prompt) {
             ],
             generationConfig: {
               temperature: 0.4,
-              maxOutputTokens: 6000,
+              maxOutputTokens: 8192,
               responseMimeType: 'application/json'
             }
           })
@@ -785,7 +869,9 @@ function chiaveCache(body) {
     intolleranze: body.intolleranze,
     piccantezza: body.piccantezza,
     budget: body.budget,
-    ingredientiCasa: body.ingredientiCasa
+    ingredientiCasa: body.ingredientiCasa,
+    modalitaSettimanale: body.modalitaSettimanale,
+    giorniPiano: body.giorniPiano
   });
 }
 
