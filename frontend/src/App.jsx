@@ -166,6 +166,18 @@ function FooterLinks() {
   );
 }
 
+function FooterLinks() {
+  return (
+    <nav className="footer-links" aria-label="Link informativi">
+      <a href="/come-funziona.html">Come funziona</a>
+      <a href="/faq.html">FAQ</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/cookie.html">Cookie</a>
+      <a href="/contatti.html">Contatti</a>
+    </nav>
+  );
+}
+
 export default function App() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
@@ -188,6 +200,7 @@ const [ricetteSalvate, setRicetteSalvate] = useState([]);
 const [mostraSalvate, setMostraSalvate] = useState(false);
 const [mostraCronologia, setMostraCronologia] = useState(false);
 const [cronologia, setCronologia] = useState([]);
+const [ricercaSupermercato, setRicercaSupermercato] = useState('');
 
 const [mostraAdBreak, setMostraAdBreak] = useState(false);
 const [azioneDopoAd, setAzioneDopoAd] = useState(null);
@@ -1546,18 +1559,45 @@ const preparazioneAttiva =
         {step === 1 && (
           <div className="step-body">
             <h1 className="step-title">Dove fai la spesa?</h1>
-            <div className="market-grid">
-              {SUPERMERCATI.map(s => (
-                <button
-                  type="button"
-                  key={s.id}
-                  className={`market-card ${form.supermercato === s.id ? 'market-active' : ''}`}
-                  onClick={() => setForm(f => ({ ...f, supermercato: s.id }))}
-                >
-                  <span className="market-name">{s.label}</span>
-                </button>
-              ))}
+
+            <div className="market-search-box">
+              <span>🔎</span>
+              <input
+                type="text"
+                placeholder="Cerca supermercato..."
+                value={ricercaSupermercato}
+                onChange={(e) => setRicercaSupermercato(e.target.value)}
+              />
             </div>
+
+            <div className="market-grid">
+              {SUPERMERCATI
+                .filter(s =>
+                  s.label
+                    .toLowerCase()
+                    .includes(ricercaSupermercato.trim().toLowerCase())
+                )
+                .map(s => (
+                  <button
+                    type="button"
+                    key={s.id}
+                    className={`market-card ${form.supermercato === s.id ? 'market-active' : ''}`}
+                    onClick={() => setForm(f => ({ ...f, supermercato: s.id }))}
+                  >
+                    <span className="market-name">{s.label}</span>
+                  </button>
+                ))}
+            </div>
+
+            {SUPERMERCATI.filter(s =>
+              s.label
+                .toLowerCase()
+                .includes(ricercaSupermercato.trim().toLowerCase())
+            ).length === 0 && (
+              <div className="market-empty">
+                Nessun supermercato trovato.
+              </div>
+            )}
           </div>
         )}
 
