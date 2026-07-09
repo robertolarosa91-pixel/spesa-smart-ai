@@ -79,10 +79,11 @@ function caricaScriptAdSense() {
   });
 }
 
-function AdCard({ slot, compact = false }) {
+function AdCard({ slot, compact = false, adsConsent = true }) {
   const adPushedRef = useRef(false);
 
   useEffect(() => {
+    if (!adsConsent) return;
     if (!ADSENSE_CLIENT || !slot) return;
     if (adPushedRef.current) return;
 
@@ -105,36 +106,32 @@ function AdCard({ slot, compact = false }) {
     return () => {
       annullato = true;
     };
-  }, [slot]);
+  }, [slot, adsConsent]);
 
   return (
     <section className={`ad-card ${compact ? 'ad-card-compact' : ''}`}>
       <div className="ad-card-label">Sponsorizzato</div>
 
-      <ins
-        className="adsbygoogle ad-ins"
-        style={{
-          display: 'block',
-          minHeight: compact ? 280 : 90
-        }}
-        data-ad-client={ADSENSE_CLIENT}
-        data-ad-slot={slot}
-        data-ad-format={compact ? 'rectangle' : 'auto'}
-        data-full-width-responsive="true"
-      />
+      {!adsConsent ? (
+        <div className="ad-placeholder">
+          <span>🔒</span>
+          <strong>Pubblicità non caricata</strong>
+          <small>Hai scelto di non accettare i cookie pubblicitari</small>
+        </div>
+      ) : (
+        <ins
+          className="adsbygoogle ad-ins"
+          style={{
+            display: 'block',
+            minHeight: compact ? 280 : 90
+          }}
+          data-ad-client={ADSENSE_CLIENT}
+          data-ad-slot={slot}
+          data-ad-format="auto"
+          data-full-width-responsive="true"
+        />
+      )}
     </section>
-  );
-}
-
-function FooterLinks() {
-  return (
-    <nav className="footer-links" aria-label="Link informativi">
-      <a href="/come-funziona.html">Come funziona</a>
-      <a href="/faq.html">FAQ</a>
-      <a href="/privacy.html">Privacy</a>
-      <a href="/cookie.html">Cookie</a>
-      <a href="/contatti.html">Contatti</a>
-    </nav>
   );
 }
 
@@ -164,6 +161,14 @@ const [cronologia, setCronologia] = useState([]);
 const [mostraAdBreak, setMostraAdBreak] = useState(false);
 const [azioneDopoAd, setAzioneDopoAd] = useState(null);
 const [adCountdown, setAdCountdown] = useState(3);
+
+const [cookieConsent, setCookieConsent] = useState(() => {
+  try {
+    return localStorage.getItem('spesa_smart_cookie_consent') || '';
+  } catch {
+    return '';
+  }
+});
 
 useEffect(() => {
   const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -560,7 +565,58 @@ function renderAccountArea() {
           </div>
         </div>
       )}
+
+      {renderCookieBanner()}
     </header>
+  );
+}
+
+function salvaCookieConsent(scelta) {
+  try {
+    localStorage.setItem('spesa_smart_cookie_consent', scelta);
+  } catch (err) {
+    console.warn('Errore salvataggio consenso cookie:', err);
+  }
+
+  setCookieConsent(scelta);
+}
+
+function renderCookieBanner() {
+  if (cookieConsent) return null;
+
+  return (
+    <div className="cookie-consent">
+      <div className="cookie-consent-text">
+        <strong>Cookie e privacy</strong>
+        <p>
+          Usiamo tecnologie simili ai cookie per funzioni dell’app, salvataggi locali
+          e annunci pubblicitari. Puoi accettare o rifiutare.
+        </p>
+
+        <div className="cookie-consent-links">
+          <a href="/privacy.html">Privacy</a>
+          <a href="/cookie.html">Cookie</a>
+        </div>
+      </div>
+
+      <div className="cookie-consent-actions">
+        <button
+          type="button"
+          className="cookie-reject-btn"
+          onClick={() => salvaCookieConsent('rejected')}
+        >
+          Rifiuta
+        </button>
+
+        <button
+          type="button"
+          className="cookie-accept-btn"
+          onClick={() => salvaCookieConsent('accepted')}
+        >
+          Accetta
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -662,7 +718,11 @@ function renderAdBreakOverlay() {
 </div>
         </div>
 
-        <AdCard slot={ADSENSE_SLOT_BREAK} compact />
+        <AdCard
+  slot={ADSENSE_SLOT_BREAK}
+  compact
+  adsConsent={cookieConsent === 'accepted'}
+/>
 
         <button
           type="button"
@@ -1204,7 +1264,10 @@ const preparazioneAttiva =
   {errore && <div className="error-box">{errore}</div>}
 </div>
 
-        <AdCard slot={ADSENSE_SLOT_RESULTS} />
+        <AdCard
+  slot={ADSENSE_SLOT_RESULTS}
+  adsConsent={cookieConsent === 'accepted'}
+/>
 
         <div className="risultato">
           <section>
