@@ -44,18 +44,4 @@
     <priority>0.5</priority>
   </url>
 
-  <url>
-    <loc>https://spesa-smart-ai.vercel.app/robots.txt</loc>
-    <lastmod>2026-07-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.3</priority>
-  </url>
-
-  <url>
-    <loc>https://spesa-smart-ai.vercel.app/ads.txt</loc>
-    <lastmod>2026-07-09</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.2</priority>
-  </url>
-
 </urlset>
