@@ -16,10 +16,29 @@ const SUPERMERCATI = [
   { id: 'lidl', label: 'Lidl' },
   { id: 'eurospin', label: 'Eurospin' },
   { id: 'md', label: 'MD' },
+  { id: 'aldi', label: 'Aldi' },
+  { id: 'penny', label: 'Penny Market' },
   { id: 'esselunga', label: 'Esselunga' },
   { id: 'conad', label: 'Conad' },
   { id: 'coop', label: 'Coop' },
-  { id: 'carrefour', label: 'Carrefour' }
+  { id: 'carrefour', label: 'Carrefour' },
+  { id: 'pam', label: 'Pam Panorama' },
+  { id: 'bennet', label: 'Bennet' },
+  { id: 'tigros', label: 'Tigros' },
+  { id: 'iper', label: 'Iper La grande i' },
+  { id: 'iperal', label: 'Iperal' },
+  { id: 'famila', label: 'Famila' },
+  { id: 'despar', label: 'Despar' },
+  { id: 'interspar', label: 'Interspar' },
+  { id: 'natura_si', label: 'NaturaSì' },
+  { id: 'crai', label: 'Crai' },
+  { id: 'sigma', label: 'Sigma' },
+  { id: 'selex', label: 'Selex' },
+  { id: 'todis', label: 'Todis' },
+  { id: 'deco', label: 'Decò' },
+  { id: 'il_gigante', label: 'Il Gigante' },
+  { id: 'u2', label: 'U2 Supermercato' },
+  { id: 'dok', label: 'Dok' }
 ];
 
 const INTOLLERANZE_COMUNI = ['Glutine', 'Lattosio', 'Frutta a guscio', 'Uova', 'Pesce/crostacei', 'Soia'];
