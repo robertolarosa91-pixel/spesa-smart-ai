@@ -2319,3 +2319,95 @@ body::after {
 .footer-links a:active {
   background: var(--sage-light);
 }
+
+
+/* ─────────────────────────────────────────────
+   MODALITÀ SPESA SETTIMANALE
+───────────────────────────────────────────── */
+
+.weekly-mode-card {
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 1rem;
+  box-shadow: 0 10px 24px rgba(55, 38, 20, 0.07);
+}
+
+.weekly-mode-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.85rem;
+}
+
+.weekly-mode-head div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.weekly-mode-head strong {
+  font-family: 'Fraunces', serif;
+  font-size: 1.15rem;
+  color: var(--ink);
+}
+
+.weekly-mode-head span {
+  color: #6b6558;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.weekly-switch {
+  min-width: 58px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: #ffffff;
+  color: #6b6558;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.weekly-switch-active {
+  background: linear-gradient(135deg, var(--sage), var(--sage-dark));
+  border-color: transparent;
+  color: #ffffff;
+  box-shadow: 0 10px 20px rgba(8, 123, 99, 0.22);
+}
+
+.weekly-days {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.55rem;
+  margin-top: 0.9rem;
+}
+
+.weekly-days button {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #ffffff;
+  color: var(--sage);
+  padding: 0.75rem 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.weekly-days .weekly-day-active {
+  background: linear-gradient(135deg, var(--tomato), #FF7A4B);
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: 0 10px 20px rgba(241, 90, 59, 0.22);
+}
+
+.market-counter {
+  color: var(--sage);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: -0.2rem;
+}
